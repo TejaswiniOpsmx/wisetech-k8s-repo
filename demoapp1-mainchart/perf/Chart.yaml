@@ -1,0 +1,19 @@
+apiVersion: v2
+name: demoapp1-perf
+description: A Helm chart for Kubernetes
+type: application
+version: 0.1.0
+appVersion: "1.16.0"
+dependencies:
+  - name: micro-uidemo
+    version: 0.1.0
+    repository: file://../../demoapp1/micro-uidemo/chart/perf
+  - name: appdemo
+    version: 0.1.0
+    repository: file://../../demoapp1/appdemo/chart/perf
+  - name: externaldemo
+    version: 0.1.0
+    repository: file://../../demoapp1/externaldemo/chart/perf
+  - name: es-syncdemo
+    version: 0.1.0
+    repository: file://../../demoapp1/es-syncdemo/chart/perf

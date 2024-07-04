@@ -1,0 +1,17 @@
+revision: mybranch
+micro-uidemo:
+  image:
+    tag: mybranch-1275
+    repository: docker.io/gopalvithaljayanthi/nginx
+appdemo:
+  image:
+    tag: mybranch-1275
+    repository: docker.io/gopalvithaljayanthi/nginx
+externaldemo:
+  image:
+    tag: mybranch-1275
+    repository: docker.io/gopalvithaljayanthi/nginx
+es-syncdemo:
+  image:
+    tag: mybranch-1275
+    repository: docker.io/gopalvithaljayanthi/nginx
