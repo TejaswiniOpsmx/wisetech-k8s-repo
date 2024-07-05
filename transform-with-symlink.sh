@@ -54,7 +54,11 @@ echo ----------------------------
   mkdir -p "$parent_dir"/linkchart/$env/templates
   #mv "$envdir"/deployment.yaml "$envdir"/templates
   #mv "$envdir"/service.yaml "$envdir"/templates
+
    cd "$parent_dir"/linkchart/$env
+echo where am i
+pwd
+echo where am i
    rm -rf deployment.yaml
    rm -rf service.yaml
    ln -s ../../../deployment/$env/deployment.yaml deployment.yaml
