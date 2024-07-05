@@ -18,7 +18,8 @@ fi
 PWD=$(pwd)
 echo current folder is $PWD
 
-for dir in $(find $folder -mindepth 2 -maxdepth 2 -type d -name "deployment"); do
+dir=mbe/test-new-ms/deployment
+#for dir in $(find $folder -mindepth 2 -maxdepth 2 -type d -name "deployment"); do
   parent_dir=$(dirname "$dir")
   parent_dir_name=$(basename "$parent_dir")
   echo "Directory: $dir"
@@ -29,9 +30,10 @@ for dir in $(find $folder -mindepth 2 -maxdepth 2 -type d -name "deployment"); d
   
 
   echo adding .helmignore file and Chart.yaml for every env after replacing PLACEHOLDER
-for envdir in $(find "$parent_dir"/deployment -mindepth 1 -maxdepth 1 -type d ); do
-  #cp helmignore.tmpl "$envdir"/.helmignore
-  sed -e "s/PLACEHOLDER/${parent_dir_name}/g" $PWD/Chart.tmpl >  "$envdir"/Chart.yaml
+
+envdir=mbe/test-new-ms/deployment/uat
+#for envdir in $(find "$parent_dir"/deployment -mindepth 1 -maxdepth 1 -type d ); do
+
   echo environment is $envdir
    env=$(basename "$envdir")
 echo -----------------
@@ -39,6 +41,10 @@ echo -----------------
 echo ----------------------------
   echo linking values files
   mkdir -p "$parent_dir"/linkchart/$env
+  cp helmignore.tmpl "$parent_dir"/linkchart/$env/.helmignore
+  sed -e "s/PLACEHOLDER/${parent_dir_name}/g" Chart.tmpl >  "$parent_dir"/linkchart/$env/Chart.yaml
+
+
   cd "$parent_dir"/linkchart/$env
   rm -rf values.yaml
   ln -s ../../deployment/$envdir/values.yaml values.yaml
@@ -54,9 +60,9 @@ echo ----------------------------
    ln -s ../../../deployment/$env/deployment.yaml deployment.yaml
    ln -s ../../../deployment/$env/service.yaml service.yaml
   cd $PWD
-done
+#done
    echo
    echo 
 
-done
+#done
 
