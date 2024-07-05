@@ -32,7 +32,7 @@ for envdir in $(find "$parent_dir"/chart -mindepth 1 -maxdepth 1 -type d ); do
   echo environment is $envdir
   echo moving template files
 
-  cp .helmignore.tmpl "$envdir"/.helmignore
+  cp helmignore.tmpl "$envdir"/.helmignore
   sed -e "s/PLACEHOLDER/${parent_dir_name}/g" Chart.tmpl >  "$envdir"/Chart.yaml
   mkdir -p "$envdir"/templates
   mv "$envdir"/deployment.yaml "$envdir"/templates
