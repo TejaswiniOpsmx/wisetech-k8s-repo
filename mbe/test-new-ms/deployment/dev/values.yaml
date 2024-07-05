@@ -16,6 +16,3 @@ resources: {}
 podAnnotations: {}
 podSecurityContext: {}
 securityContext: {}
-metadata: {}
-
-New content
