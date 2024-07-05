@@ -30,14 +30,14 @@ for dir in $(find $folder -mindepth 2 -maxdepth 2 -type d -name "deployment"); d
 
   echo adding .helmignore file and Chart.yaml for every env after replacing PLACEHOLDER
 for envdir in $(find "$parent_dir"/deployment -mindepth 1 -maxdepth 1 -type d ); do
-  cp helmignore.tmpl "$envdir"/.helmignore
-  sed -e "s/PLACEHOLDER/${parent_dir_name}/g" Chart.tmpl >  "$envdir"/Chart.yaml
+  #cp helmignore.tmpl "$envdir"/.helmignore
+  sed -e "s/PLACEHOLDER/${parent_dir_name}/g" $PWD/Chart.tmpl >  "$envdir"/Chart.yaml
   echo environment is $envdir
    env=$(basename "$envdir")
 echo -----------------
   echo env is $env
 echo ----------------------------
-  echo linking template files
+  echo linking values files
   mkdir -p "$parent_dir"/linkchart/$env
   cd "$parent_dir"/linkchart/$env
   rm -rf values.yaml
