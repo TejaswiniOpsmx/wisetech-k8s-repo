@@ -47,14 +47,14 @@ echo ----------------------------
 
   cd "$parent_dir"/linkchart/$env
   rm -rf values.yaml
-  ln -s ../../deployment/$envdir/values.yaml values.yaml
+  ln -s ../../deployment/$env/values.yaml values.yaml
   ls -lrt values.yaml
   cd $PWD
 
   mkdir -p "$envdir"/templates
   #mv "$envdir"/deployment.yaml "$envdir"/templates
   #mv "$envdir"/service.yaml "$envdir"/templates
-   cd "$envdir"/templates
+   cd "$parent_dir"/linkchart/$env
    rm -rf deployment.yaml
    rm -rf service.yaml
    ln -s ../../../deployment/$env/deployment.yaml deployment.yaml
