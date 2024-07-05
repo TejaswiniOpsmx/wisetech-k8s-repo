@@ -1,7 +1,7 @@
 image:
   #change repository
   repository: docker.io/gopalvithaljayanthi/nginx
-  tag: mybranch-1275
+  tag: mybranch-1276
 
 service:
   type: NodePort
@@ -18,3 +18,4 @@ podSecurityContext: {}
 securityContext: {}
 metadata: {}
 
+New content
