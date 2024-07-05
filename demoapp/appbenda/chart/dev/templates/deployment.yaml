@@ -1,13 +1,13 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: app
+  name: demoapp
 spec:
   replicas: 1
   revisionHistoryLimit: 10
   selector:
     matchLabels:
-      name: app
+      name: demoapp
   strategy:
     rollingUpdate:
       maxSurge: 25%
@@ -17,7 +17,7 @@ spec:
     metadata:
       creationTimestamp: null
       labels:
-        name: app
+        name: demoapp
     spec:
       containers:
       - image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
