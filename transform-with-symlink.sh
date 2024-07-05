@@ -57,6 +57,7 @@ echo ----------------------------
 
    cd "$parent_dir"/linkchart/$env
 echo where am i
+echo $parent_dir   $env     $pwd
 pwd
 echo where am i
    rm -rf deployment.yaml
