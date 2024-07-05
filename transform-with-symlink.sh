@@ -49,13 +49,12 @@ echo ----------------------------
   rm -rf values.yaml
   ln -s ../../deployment/$env/values.yaml values.yaml
   ls -lrt values.yaml
-  cd $PWD
 
   mkdir -p "$parent_dir"/linkchart/$env/templates
   #mv "$envdir"/deployment.yaml "$envdir"/templates
   #mv "$envdir"/service.yaml "$envdir"/templates
 
-   cd "$parent_dir"/linkchart/$env
+   cd templates
 echo where am i
 echo $parent_dir   $env     $PWD
 pwd
@@ -64,7 +63,7 @@ echo where am i
    rm -rf service.yaml
    ln -s ../../../deployment/$env/deployment.yaml deployment.yaml
    ln -s ../../../deployment/$env/service.yaml service.yaml
-  cd $PWD
+
 #done
    echo
    echo 
