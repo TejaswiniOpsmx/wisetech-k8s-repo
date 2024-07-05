@@ -51,7 +51,7 @@ echo ----------------------------
   ls -lrt values.yaml
   cd $PWD
 
-  mkdir -p "$envdir"/templates
+  mkdir -p "$parent_dir"/linkchart/$env/templates
   #mv "$envdir"/deployment.yaml "$envdir"/templates
   #mv "$envdir"/service.yaml "$envdir"/templates
    cd "$parent_dir"/linkchart/$env
