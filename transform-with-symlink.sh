@@ -25,8 +25,8 @@ for dir in $(find $folder -mindepth 2 -maxdepth 2 -type d -name "deployment"); d
   echo "Directory: $dir"
   echo "Parent Directory: $parent_dir"
   echo
-  echo making "$parent_dir"/linkchart
-  mkdir -p "$parent_dir"/linkchart
+  echo making "$parent_dir"/chart
+  mkdir -p "$parent_dir"/chart
   
 
 #envdir=mbe/test-new-ms/deployment/uat
@@ -37,13 +37,13 @@ for envdir in $(find "$parent_dir"/deployment -mindepth 1 -maxdepth 1 -type d );
 echo -----------------
   echo env is $env
 echo ----------------------------
-  echo making "$parent_dir"/linkchart/$env
-  mkdir -p "$parent_dir"/linkchart/$env
+  echo making "$parent_dir"/chart/$env
+  mkdir -p "$parent_dir"/chart/$env
   echo adding .helmignore file and Chart.yaml for every env after replacing PLACEHOLDER
-  cp helmignore.tmpl "$parent_dir"/linkchart/$env/.helmignore
-  sed -e "s/PLACEHOLDER/${parent_dir_name}/g" Chart.tmpl >  "$parent_dir"/linkchart/$env/Chart.yaml
+  cp helmignore.tmpl "$parent_dir"/chart/$env/.helmignore
+  sed -e "s/PLACEHOLDER/${parent_dir_name}/g" Chart.tmpl >  "$parent_dir"/chart/$env/Chart.yaml
 
-  cd "$parent_dir"/linkchart/$env
+  cd "$parent_dir"/chart/$env
 pwd
 echo symlinking values.yaml
   rm -rf values.yaml
