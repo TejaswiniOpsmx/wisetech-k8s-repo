@@ -59,10 +59,12 @@ echo where am i
 echo $parent_dir   $env     $PWD
 pwd
 echo where am i
+ls -ltr
    rm -rf deployment.yaml
    rm -rf service.yaml
    ln -s ../../../deployment/$env/deployment.yaml deployment.yaml
    ln -s ../../../deployment/$env/service.yaml service.yaml
+ls -ltr 
 
 #done
    echo
