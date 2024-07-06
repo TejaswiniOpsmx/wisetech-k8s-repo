@@ -1,0 +1,9 @@
+revision: mybranch
+appdemo1:
+  image:
+    tag: mybranch-1275
+    repository: docker.io/gopalvithaljayanthi/nginx
+es-syncdemoapp:
+  image:
+    tag: mybranch-1275
+    repository: docker.io/gopalvithaljayanthi/nginx
