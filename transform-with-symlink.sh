@@ -15,8 +15,8 @@ if [ ! -d "$folder" ]; then
   exit 1
 fi
 
-PWD=$(pwd)
-echo current folder is $PWD
+CWD=$(pwd)
+echo current folder is $CWD
 
 dir=mbe/test-new-ms/deployment
 #for dir in $(find $folder -mindepth 2 -maxdepth 2 -type d -name "deployment"); do
@@ -56,7 +56,7 @@ echo ----------------------------
 
    cd templates
 echo where am i
-echo $parent_dir   $env     $PWD
+echo $parent_dir   $env     $CWD
 pwd
 echo where am i
 ls -ltr
@@ -65,6 +65,8 @@ ls -ltr
    ln -s ../../../deployment/$env/deployment.yaml deployment.yaml
    ln -s ../../../deployment/$env/service.yaml service.yaml
 ls -ltr 
+
+cd 
 
 #done
    echo
