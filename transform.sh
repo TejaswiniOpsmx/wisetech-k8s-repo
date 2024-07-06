@@ -15,28 +15,55 @@ if [ ! -d "$folder" ]; then
   exit 1
 fi
 
+CWD=$(pwd)
+echo current folder is $CWD
 
+#dir=mbe/test-new-ms/deployment
 for dir in $(find $folder -mindepth 2 -maxdepth 2 -type d -name "deployment"); do
   parent_dir=$(dirname "$dir")
   parent_dir_name=$(basename "$parent_dir")
   echo "Directory: $dir"
   echo "Parent Directory: $parent_dir"
-  echo copying deployment folder to chart folder
   echo
+  echo making "$parent_dir"/chart
   mkdir -p "$parent_dir"/chart
-  cp -r "$dir"/* "$parent_dir"/chart
   
 
-  echo adding .helmignore file and Chart.yaml for every env after replacing PLACEHOLDER
-for envdir in $(find "$parent_dir"/chart -mindepth 1 -maxdepth 1 -type d ); do
-  echo environment is $envdir
-  echo moving template files
+#envdir=mbe/test-new-ms/deployment/uat
+for envdir in $(find "$parent_dir"/deployment -mindepth 1 -maxdepth 1 -type d ); do
 
-  cp helmignore.tmpl "$envdir"/.helmignore
-  sed -e "s/PLACEHOLDER/${parent_dir_name}/g" Chart.tmpl >  "$envdir"/Chart.yaml
-  mkdir -p "$envdir"/templates
-  mv "$envdir"/deployment.yaml "$envdir"/templates
-  mv "$envdir"/service.yaml "$envdir"/templates
+  echo environment is $envdir
+   env=$(basename "$envdir")
+echo -----------------
+  echo env is $env
+echo ----------------------------
+  echo making "$parent_dir"/chart/$env
+  mkdir -p "$parent_dir"/chart/$env
+  echo adding .helmignore file and Chart.yaml for every env after replacing PLACEHOLDER
+  cp helmignore.tmpl "$parent_dir"/chart/$env/.helmignore
+  sed -e "s/PLACEHOLDER/${parent_dir_name}/g" Chart.tmpl >  "$parent_dir"/chart/$env/Chart.yaml
+
+  cd "$parent_dir"/chart/$env
+pwd
+echo symlinking values.yaml
+  rm -rf values.yaml
+  ln -s ../../deployment/$env/values.yaml values.yaml
+  ls -lrt values.yaml
+
+  mkdir -p templates
+   cd templates
+pwd
+echo symlinking template files
+ls -ltr
+   rm -rf deployment.yaml
+   rm -rf service.yaml
+   ln -s ../../../deployment/$env/deployment.yaml deployment.yaml
+   ln -s ../../../deployment/$env/service.yaml service.yaml
+ls -ltr 
+
+cd $CWD
+pwd
+
 done
    echo
    echo 
