@@ -18,8 +18,8 @@ fi
 CWD=$(pwd)
 echo current folder is $CWD
 
-dir=mbe/test-new-ms/deployment
-#for dir in $(find $folder -mindepth 2 -maxdepth 2 -type d -name "deployment"); do
+#dir=mbe/test-new-ms/deployment
+for dir in $(find $folder -mindepth 2 -maxdepth 2 -type d -name "deployment"); do
   parent_dir=$(dirname "$dir")
   parent_dir_name=$(basename "$parent_dir")
   echo "Directory: $dir"
@@ -31,8 +31,8 @@ dir=mbe/test-new-ms/deployment
 
   echo adding .helmignore file and Chart.yaml for every env after replacing PLACEHOLDER
 
-envdir=mbe/test-new-ms/deployment/uat
-#for envdir in $(find "$parent_dir"/deployment -mindepth 1 -maxdepth 1 -type d ); do
+#envdir=mbe/test-new-ms/deployment/uat
+for envdir in $(find "$parent_dir"/deployment -mindepth 1 -maxdepth 1 -type d ); do
 
   echo environment is $envdir
    env=$(basename "$envdir")
@@ -66,11 +66,11 @@ ls -ltr
    ln -s ../../../deployment/$env/service.yaml service.yaml
 ls -ltr 
 
-cd 
+cd $CWD
 
-#done
+done
    echo
    echo 
 
-#done
+done
 
