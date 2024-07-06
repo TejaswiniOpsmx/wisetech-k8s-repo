@@ -24,12 +24,10 @@ for dir in $(find $folder -mindepth 2 -maxdepth 2 -type d -name "deployment"); d
   parent_dir_name=$(basename "$parent_dir")
   echo "Directory: $dir"
   echo "Parent Directory: $parent_dir"
-  echo symlinking deployment folder to chart folder
   echo
+  echo making "$parent_dir"/linkchart
   mkdir -p "$parent_dir"/linkchart
   
-
-  echo adding .helmignore file and Chart.yaml for every env after replacing PLACEHOLDER
 
 #envdir=mbe/test-new-ms/deployment/uat
 for envdir in $(find "$parent_dir"/deployment -mindepth 1 -maxdepth 1 -type d ); do
@@ -39,26 +37,23 @@ for envdir in $(find "$parent_dir"/deployment -mindepth 1 -maxdepth 1 -type d );
 echo -----------------
   echo env is $env
 echo ----------------------------
-  echo linking values files
+  echo making "$parent_dir"/linkchart/$env
   mkdir -p "$parent_dir"/linkchart/$env
+  echo adding .helmignore file and Chart.yaml for every env after replacing PLACEHOLDER
   cp helmignore.tmpl "$parent_dir"/linkchart/$env/.helmignore
   sed -e "s/PLACEHOLDER/${parent_dir_name}/g" Chart.tmpl >  "$parent_dir"/linkchart/$env/Chart.yaml
 
-
   cd "$parent_dir"/linkchart/$env
+pwd
+echo symlinking values.yaml
   rm -rf values.yaml
   ln -s ../../deployment/$env/values.yaml values.yaml
   ls -lrt values.yaml
 
   mkdir -p "$parent_dir"/linkchart/$env/templates
-  #mv "$envdir"/deployment.yaml "$envdir"/templates
-  #mv "$envdir"/service.yaml "$envdir"/templates
-
    cd templates
-echo where am i
-echo $parent_dir   $env     $CWD
 pwd
-echo where am i
+echo symlinking template files
 ls -ltr
    rm -rf deployment.yaml
    rm -rf service.yaml
@@ -67,6 +62,7 @@ ls -ltr
 ls -ltr 
 
 cd $CWD
+pwd
 
 done
    echo
