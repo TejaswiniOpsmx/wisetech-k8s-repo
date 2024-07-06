@@ -50,7 +50,7 @@ echo symlinking values.yaml
   ln -s ../../deployment/$env/values.yaml values.yaml
   ls -lrt values.yaml
 
-  mkdir -p "$parent_dir"/linkchart/$env/templates
+  mkdir -p templates
    cd templates
 pwd
 echo symlinking template files
