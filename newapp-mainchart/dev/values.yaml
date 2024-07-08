@@ -1,15 +1,15 @@
 revision: mybranch
 micro-ui:
   image:
-    tag: mybranch-1280
+    tag: mybranch-1275
     repository: docker.io/gopalvithaljayanthi/nginx
 app:
   image:
-    tag: mybranch-1279
+    tag: mybranch-1275
     repository: docker.io/gopalvithaljayanthi/nginx
 external:
   image:
-    tag: mybranch-1276
+    tag: mybranch-1275
     repository: docker.io/gopalvithaljayanthi/nginx
 es-sync:
   image:
