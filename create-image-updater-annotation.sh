@@ -2,7 +2,7 @@
 
 # Check if the required argument is provided
 if [ "$#" -ne 1 ]; then
-  echo "Usage: $0 <path-to-yaml-file>"
+  echo "Usage: $0 <path-to-yaml-file>, the yaml file should be a values.yaml from a mainchart"
   exit 1
 fi
 
@@ -55,20 +55,12 @@ done
    \"notifications.argoproj.io/subscribe.on-deployed.github\": \"mainchart-qa-on-deployed\"
   }" "$tmpfile"
 
-#cat "$tmpfile"
+cat $tmpfile
+pwd
+cp $tmpfile ./$appname-annotations.yaml
+rm $tmpfile
 
-# Output the final YAML file
-
-
-
-#path="a/b/c/d"
-
-# Use parameter expansion to extract the first component
-top_folder="${input_file%%/*}"
-
-echo "Top-most folder: $top_folder"
-
-mv "$tmpfile"  $top_folder/annotations.yaml
-echo "YAML file created: annotations.yaml in folder: $top_folder"
+#mv "$tmpfile"  
+#echo "YAML file created: annotations.yaml in folder: $top_folder"
 
 #argocd-image-updater.argoproj.io/<image_name>.ignore-tags: "*"
