@@ -1,0 +1,21 @@
+controlPlane:
+  backingStore:
+    etcd:
+      embedded:
+        enabled: true
+  ingress:
+    enabled: true
+    host: vcluster-k8s-api.example.com
+sync:
+  toHost:
+    serviceAccounts:
+      enabled: true   
+  fromHost:
+    nodes:
+      enabled: true
+      clearImageStatus: true         
+exportKubeConfig:
+  context: my-vcluster-context
+  server: https://vcluster-k8s-api.example.com
+  secret:
+    name: my-vcluster-kubeconfig      
