@@ -1,20 +1,25 @@
-project: default
-destination:
-  server: 'https://kubernetes.default.svc'
-  namespace: team-x
-syncPolicy:
-  syncOptions:
-    - CreateNamespace=true
-sources:
-  - repoURL: 'https://charts.loft.sh'
-    targetRevision: 0.19.6
-    helm:
-      valueFiles:
-        - $values/vcluster/values.yaml
-        - $values/vcluster/vc-argo-2-11-4-values.yaml
-      releaseName: vc-argo-2-11-4
-    chart: vcluster
-  - repoURL: 'https://github.com/gopaljayanthi/wisetech-k8s-repo.git'
-    path: /
-    targetRevision: master
-    ref: values
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: create-vcluster
+  namespace: argocd
+spec:
+  project: default
+  destination:
+    name: 'vc-argocd-2-10-9'
+    namespace: vcluster-vc-argocd-2.11.4
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+  sources:
+    - repoURL: 'https://charts.loft.sh'
+      targetRevision: 0.19.6
+      helm:
+        valueFiles:
+          - $values/vcluster/values.yaml
+          - $values/vcluster/vc-argo-2-11-4-values.yaml
+        releaseName: vc-argo-2-11-4
+      chart: vcluster
+    - repoURL: 'https://github.com/gopaljayanthi/wisetech-k8s-repo.git'
+      targetRevision: master
+      ref: values
