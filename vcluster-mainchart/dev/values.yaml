@@ -1,450 +1,793 @@
-# These annotations will be applied to all objects created in this chart
-globalAnnotations: {}
-
-# If vCluster.Pro is enabled
-pro: false
-
-# Defines where vCluster should search for a license secret. If you are using the vCluster.Pro control-plane,
-# this is optional. vCluster by default will lookout for a secret called vc-VCLUSTER_NAME-license and if found use that.
-# You can also use a secret within another namespace by using the format NAMESPACE/NAME. If the secret is in another
-# namespace, please enable clusterRole.create and define an extra clusterRole.extraRules to allow vCluster to retrieve
-# secrets within the cluster.
-proLicenseSecret: ""
-
-# If true, will deploy vcluster in headless mode, which means no deployment
-# or statefulset is created.
-headless: false
-
-monitoring:
-  serviceMonitor:
-    enabled: false
-
-# DefaultImageRegistry will be prepended to all deployed vcluster images, such as the vcluster pod, coredns etc.. Deployed
-# images within the vcluster will not be rewritten.
-defaultImageRegistry: ""
-
-# Plugins that should get loaded. Usually you want to apply those via 'vcluster create ... -f https://.../plugin.yaml'
-plugin: {}
-# Manually configure a plugin called test
-# test:
-#   image: ...
-#   env: ...
-#   rbac:
-#     clusterRole:
-#       extraRules: ...
-#     role:
-#       extraRules: ...
-
-# Resource syncers that should be enabled/disabled.
-# Enabling syncers will impact RBAC Role and ClusterRole permissions.
-# To disable a syncer set "enabled: false".
-# See docs for details - https://www.vcluster.com/docs/architecture/synced-resources
+# Sync describes how to sync resources from the virtual cluster to host cluster and back.
 sync:
-  services:
-    enabled: true
-  configmaps:
-    enabled: true
-    all: false
-  secrets:
-    all: false
-    enabled: true
-  endpoints:
-    enabled: true
-  pods:
-    enabled: true
-    ephemeralContainers: false
-    status: false
-  events:
-    enabled: true
-  persistentvolumeclaims:
-    enabled: true
-  ingresses:
-    enabled: false
-  ingressclasses: {}
-    # By default IngressClasses sync is enabled when the Ingress sync is enabled
-    # but it can be explicitly disabled by setting:
-    # enabled: false
-  fake-nodes:
-    enabled: true # will be ignored if nodes.enabled = true
-  fake-persistentvolumes:
-    enabled: true # will be ignored if persistentvolumes.enabled = true
-  nodes:
-    fakeKubeletIPs: true
-    enabled: false
-    # If nodes sync is enabled, and syncAllNodes = true, the virtual cluster
-    # will sync all nodes instead of only the ones where some pods are running.
-    syncAllNodes: false
-    # nodeSelector is used to limit which nodes get synced to the vcluster,
-    # and which nodes are used to run vcluster pods.
-    # A valid string representation of a label selector must be used.
-    nodeSelector: ""
-    # if true, vcluster will run with a scheduler and node changes are possible
-    # from within the virtual cluster. This is useful if you would like to
-    # taint, drain and label nodes from within the virtual cluster
-    enableScheduler: false
-    # DEPRECATED: use enable scheduler instead
-    # syncNodeChanges allows vcluster user edits of the nodes to be synced down to the host nodes.
-    # Write permissions on node resource will be given to the vcluster.
-    syncNodeChanges: false
-  persistentvolumes:
-    enabled: false
-  storageclasses:
-    enabled: false
-  # formerly named - "legacy-storageclasses"
-  hoststorageclasses:
-    enabled: false
-  priorityclasses:
-    enabled: false
-  networkpolicies:
-    enabled: false
-  volumesnapshots:
-    enabled: false
-  poddisruptionbudgets:
-    enabled: false
-  serviceaccounts:
-    enabled: false
-  # generic CRD configuration
-  generic:
-    config: |-
-      ---
-
-# If enabled, will fallback to host dns for resolving domains. This
-# is useful if using istio or dapr in the host cluster and sidecar
-# containers cannot connect to the central instance. Its also useful
-# if you want to access host cluster services from within the vcluster.
-fallbackHostDns: false
-
-# Map Services between host and virtual cluster
-mapServices:
-  # Services that should get mapped from the
-  # virtual cluster to the host cluster.
-  # vcluster will make sure to sync the service
-  # ip to the host cluster automatically as soon
-  # as the service exists.
-  # For example:
-  # fromVirtual:
-  #   - from: my-namespace/name
-  #     to: host-service
-  fromVirtual: []
-  # Same as from virtual, but instead sync services
-  # from the host cluster into the virtual cluster.
-  # If the namespace does not exist, vcluster will
-  # also create the namespace for the service.
-  fromHost: []
-
-# Proxy metrics server from host to virtual
-proxy:
-  metricsServer:
-    nodes:
-      enabled: false
+  # Configure resources to sync from the virtual cluster to the host cluster.
+  toHost:
+    # Services defines if services created within the virtual cluster should get synced to the host cluster.
+    services:
+      enabled: true
+    # Endpoints defines if endpoints created within the virtual cluster should get synced to the host cluster.
+    endpoints:
+      enabled: true
+    # PersistentVolumeClaims defines if persistent volume claims created within the virtual cluster should get synced to the host cluster.
+    persistentVolumeClaims:
+      enabled: true
+    # ConfigMaps defines if config maps created within the virtual cluster should get synced to the host cluster.
+    configMaps:
+      enabled: true
+      # All defines if all resources of that type should get synced or only the necessary ones that are needed.
+      all: false
+    # Secrets defines if secrets created within the virtual cluster should get synced to the host cluster.
+    secrets:
+      enabled: true
+      # All defines if all resources of that type should get synced or only the necessary ones that are needed.
+      all: false
+    # Pods defines if pods created within the virtual cluster should get synced to the host cluster.
     pods:
+      # Enabled defines if pod syncing should be enabled.
+      enabled: true
+      # TranslateImage maps an image to another image that should be used instead. For example this can be used to rewrite
+      # a certain image that is used within the virtual cluster to be another image on the host cluster
+      translateImage: {}
+      # EnforceTolerations will add the specified tolerations to all pods synced by the virtual cluster.
+      enforceTolerations: []
+      # UseSecretsForSATokens will use secrets to save the generated service account tokens by virtual cluster instead of using a
+      # pod annotation.
+      useSecretsForSATokens: false
+      # RewriteHosts is a special option needed to rewrite statefulset containers to allow the correct FQDN. virtual cluster will add
+      # a small container to each stateful set pod that will initially rewrite the /etc/hosts file to match the FQDN expected by
+      # the virtual cluster.
+      rewriteHosts:
+        # Enabled specifies if rewriting stateful set pods should be enabled.
+        enabled: true
+        # InitContainer holds extra options for the init container used by vCluster to rewrite the FQDN for stateful set pods.
+        initContainer:
+          # Image is the image virtual cluster should use to rewrite this FQDN.
+          image: "library/alpine:3.20"
+          # Resources are the resources that should be assigned to the init container for each stateful set init container.
+          resources:
+            # Limits are resource limits for the container
+            limits:
+              cpu: 30m
+              memory: 64Mi
+            # Requests are minimal resources that will be consumed by the container
+            requests:
+              cpu: 30m
+              memory: 64Mi
+    # Ingresses defines if ingresses created within the virtual cluster should get synced to the host cluster.
+    ingresses:
       enabled: false
+    # PriorityClasses defines if priority classes created within the virtual cluster should get synced to the host cluster.
+    priorityClasses:
+      enabled: false
+    # NetworkPolicies defines if network policies created within the virtual cluster should get synced to the host cluster.
+    networkPolicies:
+      enabled: false
+    # VolumeSnapshots defines if volume snapshots created within the virtual cluster should get synced to the host cluster.
+    volumeSnapshots:
+      enabled: false
+    # PodDisruptionBudgets defines if pod disruption budgets created within the virtual cluster should get synced to the host cluster.
+    podDisruptionBudgets:
+      enabled: false
+    # ServiceAccounts defines if service accounts created within the virtual cluster should get synced to the host cluster.
+    serviceAccounts:
+      enabled: false
+    # StorageClasses defines if storage classes created within the virtual cluster should get synced to the host cluster.
+    storageClasses:
+      enabled: false
+    # PersistentVolumes defines if persistent volumes created within the virtual cluster should get synced to the host cluster.
+    persistentVolumes:
+      enabled: false
+  
+  # Configure what resources vCluster should sync from the host cluster to the virtual cluster.
+  fromHost:
+    # Events defines if events should get synced from the host cluster to the virtual cluster, but not back.
+    events:
+      enabled: true
+    # CSIDrivers defines if csi drivers should get synced from the host cluster to the virtual cluster, but not back. If auto, is automatically enabled when the virtual scheduler is enabled.
+    csiDrivers:
+      # Enabled defines if this option should be enabled.
+      enabled: auto
+    # CSINodes defines if csi nodes should get synced from the host cluster to the virtual cluster, but not back. If auto, is automatically enabled when the virtual scheduler is enabled.
+    csiNodes:
+      # Enabled defines if this option should be enabled.
+      enabled: auto
+    # CSIStorageCapacities defines if csi storage capacities should get synced from the host cluster to the virtual cluster, but not back. If auto, is automatically enabled when the virtual scheduler is enabled.
+    csiStorageCapacities:
+      # Enabled defines if this option should be enabled.
+      enabled: auto
+    # StorageClasses defines if storage classes should get synced from the host cluster to the virtual cluster, but not back. If auto, is automatically enabled when the virtual scheduler is enabled.
+    storageClasses:
+      # Enabled defines if this option should be enabled.
+      enabled: auto
+    # IngressClasses defines if ingress classes should get synced from the host cluster to the virtual cluster, but not back.
+    ingressClasses:
+      enabled: false
+    # Nodes defines if nodes should get synced from the host cluster to the virtual cluster, but not back.
+    nodes:
+      # Enabled specifies if syncing real nodes should be enabled. If this is disabled, vCluster will create fake nodes instead.
+      enabled: false
+      # SyncBackChanges enables syncing labels and taints from the virtual cluster to the host cluster. If this is enabled someone within the virtual cluster will be able to change the labels and taints of the host cluster node.
+      syncBackChanges: false
+      # ClearImageStatus will erase the image status when syncing a node. This allows to hide images that are pulled by the node.
+      clearImageStatus: false
+      # Selector can be used to define more granular what nodes should get synced from the host cluster to the virtual cluster.
+      selector:
+        # All specifies if all nodes should get synced by vCluster from the host to the virtual cluster or only the ones where pods are assigned to.
+        all: false
+        labels: {}
 
-# Syncer configuration
-syncer:
-  replicas: 1
-  # Image to use for the syncer
-  # image: ghcr.io/loft-sh/vcluster
-  extraArgs: []
-  imagePullPolicy: ""
-  env: []
-  livenessProbe:
+# Configure vCluster's control plane components and deployment.
+controlPlane:
+  # Distro holds virtual cluster related distro options. A distro cannot be changed after vCluster is deployed.
+  distro:
+    # K8S holds K8s relevant configuration.
+    k8s:
+      # Enabled specifies if the K8s distro should be enabled. Only one distro can be enabled at the same time.
+      enabled: false
+      # APIServer holds configuration specific to starting the api server.
+      apiServer:
+        enabled: true
+        # Command is the command to start the distro binary. This will override the existing command.
+        command: []
+        # ExtraArgs are additional arguments to pass to the distro binary.
+        extraArgs: []
+        # ImagePullPolicy is the pull policy for the distro image
+        imagePullPolicy: ""
+        # Image is the distro image
+        image:
+          # Registry is the registry of the container image, e.g. my-registry.com or ghcr.io. This setting can be globally
+          # overridden via the controlPlane.advanced.defaultImageRegistry option. Empty means docker hub.
+          registry: registry.k8s.io
+          # Repository is the repository of the container image, e.g. my-repo/my-image
+          repository: kube-apiserver
+          # Tag is the tag of the container image, e.g. latest
+          tag: "v1.30.2"
+      # ControllerManager holds configuration specific to starting the controller manager.
+      controllerManager:
+        enabled: true
+        # Command is the command to start the distro binary. This will override the existing command.
+        command: []
+        # ExtraArgs are additional arguments to pass to the distro binary.
+        extraArgs: []
+        # ImagePullPolicy is the pull policy for the distro image
+        imagePullPolicy: ""
+        # Image is the distro image
+        image:
+          # Registry is the registry of the container image, e.g. my-registry.com or ghcr.io. This setting can be globally
+          # overridden via the controlPlane.advanced.defaultImageRegistry option. Empty means docker hub.
+          registry: registry.k8s.io
+          # Repository is the repository of the container image, e.g. my-repo/my-image
+          repository: "kube-controller-manager"
+          # Tag is the tag of the container image, e.g. latest
+          tag: "v1.30.2"
+      # Scheduler holds configuration specific to starting the scheduler. Enable this via controlPlane.advanced.virtualScheduler.enabled
+      scheduler:
+        # Command is the command to start the distro binary. This will override the existing command.
+        command: []
+        # ExtraArgs are additional arguments to pass to the distro binary.
+        extraArgs: []
+        # ImagePullPolicy is the pull policy for the distro image
+        imagePullPolicy: ""
+        # Image is the distro image
+        image:
+          # Registry is the registry of the container image, e.g. my-registry.com or ghcr.io. This setting can be globally
+          # overridden via the controlPlane.advanced.defaultImageRegistry option. Empty means docker hub.
+          registry: registry.k8s.io
+          # Repository is the repository of the container image, e.g. my-repo/my-image
+          repository: "kube-scheduler"
+          # Tag is the tag of the container image, e.g. latest
+          tag: "v1.29.0"
+      # Env are extra environment variables to use for the main container and NOT the init container.
+      env: []
+      # Security options can be used for the distro init container
+      securityContext: {}
+      # Resources for the distro init container
+      resources:
+        limits:
+          cpu: 100m
+          memory: 256Mi
+        requests:
+          cpu: 40m
+          memory: 64Mi
+    # K3S holds K3s relevant configuration.
+    k3s:
+      # Enabled specifies if the K3s distro should be enabled. Only one distro can be enabled at the same time.
+      enabled: false
+      # Command is the command to start the distro binary. This will override the existing command.
+      command: []
+      # ExtraArgs are additional arguments to pass to the distro binary.
+      extraArgs: []
+      # ImagePullPolicy is the pull policy for the distro image
+      imagePullPolicy: ""
+      # Image is the distro image
+      image:
+        # Registry is the registry of the container image, e.g. my-registry.com or ghcr.io. This setting can be globally
+        # overridden via the controlPlane.advanced.defaultImageRegistry option. Empty means docker hub.
+        registry: ""
+        # Repository is the repository of the container image, e.g. my-repo/my-image
+        repository: "rancher/k3s"
+        # Tag is the tag of the container image, e.g. latest
+        tag: "v1.30.2-k3s1"
+      # Security options can be used for the distro init container
+      securityContext: {}
+      # Resources for the distro init container
+      resources:
+        limits:
+          cpu: 100m
+          memory: 256Mi
+        requests:
+          cpu: 40m
+          memory: 64Mi
+    # K0S holds k0s relevant configuration.
+    k0s:
+      # Enabled specifies if the k0s distro should be enabled. Only one distro can be enabled at the same time.
+      enabled: false
+      # Config allows you to override the k0s config passed to the k0s binary.
+      config: ""
+      # Command is the command to start the distro binary. This will override the existing command.
+      command: []
+      # ExtraArgs are additional arguments to pass to the distro binary.
+      extraArgs: []
+      # ImagePullPolicy is the pull policy for the distro image
+      imagePullPolicy: ""
+      # Image is the distro image
+      image:
+        # Registry is the registry of the container image, e.g. my-registry.com or ghcr.io. This setting can be globally
+        # overridden via the controlPlane.advanced.defaultImageRegistry option. Empty means docker hub.
+        registry: ""
+        # Repository is the repository of the container image, e.g. my-repo/my-image
+        repository: "k0sproject/k0s"
+        # Tag is the tag of the container image, e.g. latest
+        tag: "v1.30.2-k0s.0"
+      # Security options can be used for the distro init container
+      securityContext: {}
+      # Resources for the distro init container
+      resources:
+        limits:
+          cpu: 100m
+          memory: 256Mi
+        requests:
+          cpu: 40m
+          memory: 64Mi
+    # EKS holds eks relevant configuration.
+    eks:
+      # Enabled specifies if the K8s distro should be enabled. Only one distro can be enabled at the same time.
+      enabled: false
+      # APIServer holds configuration specific to starting the api server.
+      apiServer:
+        enabled: true
+        # Command is the command to start the distro binary. This will override the existing command.
+        command: []
+        # ExtraArgs are additional arguments to pass to the distro binary.
+        extraArgs: []
+        # ImagePullPolicy is the pull policy for the distro image
+        imagePullPolicy: ""
+        # Image is the distro image
+        image:
+          # Registry is the registry of the container image, e.g. my-registry.com or ghcr.io. This setting can be globally
+          # overridden via the controlPlane.advanced.defaultImageRegistry option. Empty means docker hub.
+          registry: "public.ecr.aws"
+          # Repository is the repository of the container image, e.g. my-repo/my-image
+          repository: "eks-distro/kubernetes/kube-apiserver"
+          # Tag is the tag of the container image, e.g. latest
+          tag: "v1.28.2-eks-1-28-6"
+      # ControllerManager holds configuration specific to starting the controller manager.
+      controllerManager:
+        enabled: true
+        # Command is the command to start the distro binary. This will override the existing command.
+        command: []
+        # ExtraArgs are additional arguments to pass to the distro binary.
+        extraArgs: []
+        # ImagePullPolicy is the pull policy for the distro image
+        imagePullPolicy: ""
+        # Image is the distro image
+        image:
+          # Registry is the registry of the container image, e.g. my-registry.com or ghcr.io. This setting can be globally
+          # overridden via the controlPlane.advanced.defaultImageRegistry option. Empty means docker hub.
+          registry: "public.ecr.aws"
+          # Repository is the repository of the container image, e.g. my-repo/my-image
+          repository: "eks-distro/kubernetes/kube-controller-manager"
+          # Tag is the tag of the container image, e.g. latest
+          tag: "v1.28.2-eks-1-28-6"
+      # Scheduler holds configuration specific to starting the scheduler. Enable this via controlPlane.advanced.virtualScheduler.enabled
+      scheduler:
+        # Command is the command to start the distro binary. This will override the existing command.
+        command: []
+        # ExtraArgs are additional arguments to pass to the distro binary.
+        extraArgs: []
+        # ImagePullPolicy is the pull policy for the distro image
+        imagePullPolicy: ""
+        # Image is the distro image
+        image:
+          # Registry is the registry of the container image, e.g. my-registry.com or ghcr.io. This setting can be globally
+          # overridden via the controlPlane.advanced.defaultImageRegistry option. Empty means docker hub.
+          registry: "public.ecr.aws"
+          # Repository is the repository of the container image, e.g. my-repo/my-image
+          repository: "eks-distro/kubernetes/kube-scheduler"
+          # Tag is the tag of the container image, e.g. latest
+          tag: "v1.28.2-eks-1-28-6"
+      # Env are extra environment variables to use for the main container and NOT the init container.
+      env: []
+      # Security options can be used for the distro init container
+      securityContext: {}
+      # Resources for the distro init container
+      resources:
+        limits:
+          cpu: 100m
+          memory: 256Mi
+        requests:
+          cpu: 40m
+          memory: 64Mi
+  
+  # BackingStore defines which backing store to use for virtual cluster. If not defined will use embedded database as a default backing store.
+  backingStore:
+    # Database defines that a database backend should be used as the backend for the virtual cluster. This uses a project called kine under the hood which is a shim for bridging Kubernetes and relational databases.
+    database:
+      # Embedded defines that an embedded database (sqlite) should be used as the backend for the virtual cluster
+      embedded:
+        # Enabled defines if the database should be used.
+        enabled: false
+      # External defines that an external database should be used as the backend for the virtual cluster
+      external:
+        # Enabled defines if the database should be used.
+        enabled: false
+        # DataSource is the kine dataSource to use for the database. This depends on the database format.
+        # This is optional for the embedded database. Examples:
+        # * mysql: mysql://username:password@tcp(hostname:3306)/k3s
+        # * postgres: postgres://username:password@hostname:5432/k3s
+        dataSource: ""
+        # CertFile is the cert file to use for the database. This is optional.
+        certFile: ""
+        # KeyFile is the key file to use for the database. This is optional.
+        keyFile: ""
+        # CaFile is the ca file to use for the database. This is optional.
+        caFile: ""
+    # Etcd defines that etcd should be used as the backend for the virtual cluster
+    etcd:
+      # Embedded defines to use embedded etcd as a storage backend for the virtual cluster
+      embedded:
+        # Enabled defines if the embedded etcd should be used.
+        enabled: false
+        # MigrateFromDeployedEtcd signals that vCluster should migrate from the deployed external etcd to embedded etcd.
+        migrateFromDeployedEtcd: false
+      # Deploy defines to use an external etcd that is deployed by the helm chart
+      deploy:
+        # Enabled defines that an external etcd should be deployed.
+        enabled: false
+        # StatefulSet holds options for the external etcd statefulSet.
+        statefulSet:
+          # Enabled defines if the statefulSet should be deployed
+          enabled: true
+          # EnableServiceLinks for the StatefulSet pod
+          enableServiceLinks: true
+          annotations: {}
+          labels: {}
+          # Image is the image to use for the external etcd statefulSet
+          image:
+            # Registry is the registry of the container image, e.g. my-registry.com or ghcr.io. This setting can be globally
+            # overridden via the controlPlane.advanced.defaultImageRegistry option. Empty means docker hub.
+            registry: "registry.k8s.io"
+            # Repository is the repository of the container image, e.g. my-repo/my-image
+            repository: "etcd"
+            # Tag is the tag of the container image, e.g. latest
+            tag: "3.5.13-0"
+          # ImagePullPolicy is the pull policy for the external etcd image
+          imagePullPolicy: ""
+          # ExtraArgs are appended to the etcd command.
+          extraArgs: []
+          # Env are extra environment variables
+          env: []
+          # Resources the etcd can consume
+          resources:
+            # Requests are minimal resources that will be consumed by the container
+            requests:
+              cpu: 20m
+              memory: 150Mi
+          # Pods defines extra metadata for the etcd pods.
+          pods:
+            annotations: {}
+            labels: {}
+          # HighAvailability are high availability options
+          highAvailability:
+            # Replicas are the amount of pods to use.
+            replicas: 1
+          # Scheduling options for the etcd pods.
+          scheduling:
+            # PodManagementPolicy is the statefulSet pod management policy.
+            podManagementPolicy: Parallel
+            # NodeSelector is the node selector to apply to the pod.
+            nodeSelector: {}
+            # Affinity is the affinity to apply to the pod.
+            affinity: {}
+            # Tolerations are the tolerations to apply to the pod.
+            tolerations: []
+            # TopologySpreadConstraints are the topology spread constraints for the pod.
+            topologySpreadConstraints: []
+            # PriorityClassName is the priority class name for the the pod.
+            priorityClassName: ""
+          # Security options for the etcd pods.
+          security:
+            # PodSecurityContext specifies security context options on the pod level.
+            podSecurityContext: {}
+            # ContainerSecurityContext specifies security context options on the container level.
+            containerSecurityContext: {}
+          # Persistence options for the etcd pods.
+          persistence:
+            # VolumeClaim can be used to configure the persistent volume claim.
+            volumeClaim:
+              # Enabled enables deploying a persistent volume claim.
+              enabled: true
+              # RetentionPolicy is the persistent volume claim retention policy.
+              retentionPolicy: Retain
+              # Size is the persistent volume claim storage size.
+              size: 5Gi
+              # StorageClass is the persistent volume claim storage class.
+              storageClass: ""
+              # AccessModes are the persistent volume claim access modes.
+              accessModes: ["ReadWriteOnce"]
+            # VolumeClaimTemplates defines the volumeClaimTemplates for the statefulSet
+            volumeClaimTemplates: []
+            # AddVolumes defines extra volumes for the pod
+            addVolumes: []
+            # AddVolumeMounts defines extra volume mounts for the container
+            addVolumeMounts: []
+        # Service holds options for the external etcd service.
+        service:
+          enabled: true
+          annotations: {}
+        # HeadlessService holds options for the external etcd headless service.
+        headlessService:
+          enabled: true
+          annotations: {}
+  
+  # Proxy defines options for the virtual cluster control plane proxy that is used to do authentication and intercept requests.
+  proxy:
+    # BindAddress under which vCluster will expose the proxy.
+    bindAddress: "0.0.0.0"
+    # Port under which vCluster will expose the proxy. Changing port is currently not supported.
+    port: 8443
+    # ExtraSANs are extra hostnames to sign the vCluster proxy certificate for.
+    extraSANs: []
+  
+  # CoreDNS defines everything related to the coredns that is deployed and used within the vCluster.
+  coredns:
+    # Enabled defines if coredns is enabled
     enabled: true
-  readinessProbe:
-    enabled: true
-  volumeMounts:
-    - mountPath: /data
-      name: data
-      # readOnly: true
-  extraVolumeMounts: []
-  resources:
-    limits:
-      ephemeral-storage: 8Gi
-      memory: 2Gi
-    requests:
-      ephemeral-storage: 200Mi
-      cpu: 200m
-      memory: 256Mi
-  kubeConfigContextName: "my-vcluster"
-  serviceAnnotations: {}
-  # Storage settings for the vcluster
-  storage:
-    # If this is disabled, vcluster will use an emptyDir instead
-    # of a PersistentVolumeClaim
-    persistence: true
-    # Size of the persistent volume claim
-    size: 5Gi
-    # Optional StorageClass used for the pvc
-    # if empty default StorageClass defined in your host cluster will be used
-    #className:
-
-# Virtual Cluster (k3s) configuration
-vcluster:
-  # Image to use for the virtual cluster
-  image: rancher/k3s:v1.29.0-k3s1
-  imagePullPolicy: ""
-  command:
-    - /binaries/k3s
-  baseArgs:
-    - server
-    - --write-kubeconfig=/data/k3s-config/kube-config.yaml
-    - --data-dir=/data
-    - --disable=traefik,servicelb,metrics-server,local-storage,coredns
-    - --disable-network-policy
-    - --disable-agent
-    - --disable-cloud-controller
-    - --egress-selector-mode=disabled
-    - --flannel-backend=none
-    - --kube-apiserver-arg=bind-address=127.0.0.1
-  extraArgs: []
-  # Deprecated: Use syncer.extraVolumeMounts instead
-  extraVolumeMounts: []
-  # Deprecated: Use syncer.volumeMounts instead
-  volumeMounts: []
-  # Deprecated: Use syncer.env instead
-  env: []
-  resources:
-    limits:
-      cpu: 100m
-      memory: 256Mi
-    requests:
-      cpu: 40m
-      memory: 64Mi
-
-# Embedded etcd settings
-embeddedEtcd:
-  # If embedded etcd should be enabled, this is a PRO only feature
-  enabled: false
-
-# list of {validating/mutating}webhooks that the syncer should proxy.
-# This is a PRO only feature.
-centralAdmission:
-  validatingWebhooks: []
-  mutatingWebhooks: []
-
-
-# Extra volumes that should be created for the StatefulSet
-volumes: []
-
-# Service account that should be used by the vcluster
-serviceAccount:
-  create: true
-  # Optional name of the service account to use
-  # name: default
-  # Optional pull secrets
-  # imagePullSecrets:
-  #   - name: my-pull-secret
-
-# Service account that should be used by the pods synced by vcluster
-workloadServiceAccount:
-  # This is not supported in multi-namespace mode
-  annotations: {}
-
-# Roles & ClusterRoles for the vcluster
-rbac:
-  clusterRole:
-    # You don't need to toggle this as necessary cluster roles are created based on the enabled syncers (.sync.*.enabled).
-    # This only makes sense to enable if you want to use the extraRules below.
-    create: false
-    # Extra Rules for the cluster role
-    extraRules: []
-  role:
-    # Disable this only if you don't want vCluster to create a role. This will break most functionality if disabled.
-    create: true
-    # Extra Rules for the role
-    extraRules: []
-    # all entries in excludedApiResources will be excluded from the Role created for vcluster
-    excludedApiResources:
-      # - pods/exec
-
-# If vCluster persistent volume claims should get deleted automatically.
-autoDeletePersistentVolumeClaims: false
-
-# NodeSelector used to schedule the vcluster
-nodeSelector: {}
-
-# Affinity to apply to the vcluster statefulset
-affinity: {}
-
-# PriorityClassName to apply to the vcluster statefulset
-priorityClassName: ""
-
-# Tolerations to apply to the vcluster statefulset
-tolerations: []
-
-# Extra Labels for the stateful set
-labels: {}
-podLabels: {}
-
-# Extra Annotations for the stateful set
-annotations: {}
-podAnnotations: {}
-
-# The k3s token to use. If empty will generate one automatically
-k3sToken: ""
-
-# Service configurations
-service:
-  type: ClusterIP
-
-  # Optional configuration
-  # A list of IP addresses for which nodes in the cluster will also accept traffic for this service.
-  # These IPs are not managed by Kubernetes; e.g., an external load balancer.
-  externalIPs: []
-
-  # Optional configuration for LoadBalancer & NodePort service types
-  # Route external traffic to node-local or cluster-wide endpoints [ Local | Cluster ]
-  externalTrafficPolicy: ""
-
-  # Optional configuration for LoadBalancer service type
-  # Specify IP of load balancer to be created
-  loadBalancerIP: ""
-  # CIDR block(s) for the service allowlist
-  loadBalancerSourceRanges: []
-  # Set the loadBalancerClass if using an external load balancer controller
-  loadBalancerClass: ""
-  # Set loadBalancer specific annotations on the Kubernetes service
-  loadBalancerAnnotations: {}
-
-# Configure the ingress resource that allows you to access the vcluster
-ingress:
-  # Enable ingress record generation
-  enabled: false
-  # Ingress path type
-  pathType: ImplementationSpecific
-  ingressClassName: ""
-  host: vcluster.local
-  annotations:
-    nginx.ingress.kubernetes.io/backend-protocol: HTTPS
-    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-  # Ingress TLS configuration
-  tls: []
-    # - secretName: tls-vcluster.local
-    #   hosts:
-    #     - vcluster.local
-
-# Configure SecurityContext of the containers in the VCluster pod
-securityContext:
-  allowPrivilegeEscalation: false
-  # capabilities:
-  #  drop:
-  #  - all
-  # readOnlyRootFilesystem will be set to true by default at a later release
-  # currently leaving it undefined for backwards compatibility with older vcluster cli versions
-  # readOnlyRootFilesystem: true
-
-  # To run vcluster pod as non-root uncomment runAsUser and runAsNonRoot values.
-  # Update the runAsUser value if your cluster has limitations on user UIDs.
-  # For installation on OpenShift leave the runAsUser undefined (commented out).
-  # runAsUser: 12345
-  # runAsNonRoot: true
-  runAsUser: 0
-  runAsGroup: 0
-
-# PodSecurityContext holds pod-level security attributes and common container settings for the vCluster pod
-podSecurityContext: {}
-
-# Set "enable" to true when running vcluster in an OpenShift host
-# This will add an extra rule to the deployed role binding in order
-# to manage service endpoints
-openshift:
-  enable: false
-
-# If enabled will deploy the coredns configmap
-coredns:
-  # If CoreDns is enabled
-  enabled: true
-  # Pro only feature
-  integrated: false
-  # only used if isolation is enabled
-  fallback: 8.8.8.8
-  plugin:
-    enabled: false
-    config: []
-    # example configuration for plugin syntax, will be documented in detail
-    # - record:
-    #     fqdn: google.com
-    #   target:
-    #     mode: url
-    #     url: google.co.in
-    # - record:
-    #     service: my-namespace/my-svc    # dns-test/nginx-svc
-    #   target:
-    #     mode: host
-    #     service: dns-test/nginx-svc
-    # - record:
-    #     service: my-namespace-lb/my-svc-lb
-    #   target:
-    #     mode: host
-    #     service: dns-test-exposed-lb/nginx-svc-exposed-lb
-    # - record:
-    #     service: my-ns-external-name/my-svc-external-name
-    #   target:
-    #     mode: host
-    #     service: dns-test-external-name/nginx-svc-external-name
-    # - record:
-    #     service: my-ns-in-vcluster/my-svc-vcluster
-    #   target:
-    #     mode: vcluster              # can be tested only manually for now
-    #     vcluster: test-vcluster-ns/test-vcluster
-    #     service: dns-test-in-vcluster-ns/test-in-vcluster-service
-    # - record:
-    #     service: my-ns-in-vcluster-mns/my-svc-mns
-    #   target:
-    #     mode: vcluster              # can be tested only manually for now
-    #     service: dns-test-in-vcluster-mns/test-in-vcluster-svc-mns
-    #     vcluster: test-vcluster-ns-mns/test-vcluster-mns
-    # - record:
-    #     service: my-self-vc-ns/my-self-vc-svc
-    #   target:
-    #     mode: self
-    #     service: dns-test/nginx-svc
-  replicas: 1
-  # The nodeSelector example below specifices that coredns should only be scheduled to nodes with the arm64 label
-  # nodeSelector:
-  #   kubernetes.io/arch: arm64
-  # image: my-core-dns-image:latest
-  # config: |-
-  #   .:1053 {
-  #      ...
-  # CoreDNS service configurations
+    # Embedded defines if vCluster will start the embedded coredns service within the control-plane and not as a separate deployment. This is a PRO feature.
+    embedded: false
+    # OverwriteManifests can be used to overwrite the coredns manifests used to deploy coredns
+    overwriteManifests: ""
+    # OverwriteConfig can be used to overwrite the coredns config
+    overwriteConfig: ""
+    # PriorityClassName specifies the priority class name for the CoreDNS pods.
+    priorityClassName: ""
+    # Service holds extra options for the coredns service deployed within the virtual cluster
+    service:
+      annotations: {}
+      labels: {}
+      # Spec holds extra options for the coredns service
+      spec:
+        type: ClusterIP
+    # Deployment holds extra options for the coredns deployment deployed within the virtual cluster
+    deployment:
+      annotations: {}
+      labels: {}
+      # Image is the coredns image to use
+      image: ""
+      # Replicas is the amount of coredns pods to run.
+      replicas: 1
+      # Pods is additional metadata for the coredns pods.
+      pods:
+        labels: {}
+        annotations: {}
+      # NodeSelector is the node selector to use for coredns.
+      nodeSelector: {}
+      # Resources are the desired resources for coredns.
+      resources:
+        # Limits are resource limits for the container
+        limits:
+          cpu: 1000m
+          memory: 170Mi
+        # Requests are minimal resources that will be consumed by the container
+        requests:
+          cpu: 20m
+          memory: 64Mi
+      # TopologySpreadConstraints are the topology spread constraints for the CoreDNS pod.
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              k8s-app: kube-dns
+  
+  # Service defines options for vCluster service deployed by Helm.
   service:
-    type: ClusterIP
-    # Configuration for LoadBalancer service type
-    externalIPs: []
-    externalTrafficPolicy: ""
-    # Extra Annotations
-    annotations: {}
-  resources:
-    limits:
-      cpu: 1000m
-      memory: 170Mi
-    requests:
-      cpu: 3m
-      memory: 16Mi
-# if below option is configured, it will override the coredns manifests with the following string
-#  manifests: |-
-#    apiVersion: ...
-#    ...
-  podAnnotations: {}
-  podLabels: {}
-
-# If enabled will deploy vcluster in an isolated mode with pod security
-# standards, limit ranges and resource quotas
-isolation:
-  enabled: false
-  namespace: null
-
-  podSecurityStandard: baseline
-
-  # If enabled will add node/proxy permission to the cluster role
-  # in isolation mode
-  nodeProxyPermission:
-    enabled: false
-
-  resourceQuota:
+    # Enabled defines if the control plane service should be enabled
     enabled: true
+    labels: {}
+    annotations: {}
+    # KubeletNodePort is the node port where the fake kubelet is exposed. Defaults to 0.
+    kubeletNodePort: 0
+    # HTTPSNodePort is the node port where https is exposed. Defaults to 0.
+    httpsNodePort: 0
+    # Spec allows you to configure extra service options.
+    spec:
+      type: ClusterIP
+  
+  # Ingress defines options for vCluster ingress deployed by Helm.
+  ingress:
+    # Enabled defines if the control plane ingress should be enabled
+    enabled: false
+    # Host is the host where vCluster will be reachable
+    host: "my-host.com"
+    # PathType is the path type of the ingress
+    pathType: ImplementationSpecific
+    labels: {}
+    annotations:
+      nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+      nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # Spec allows you to configure extra ingress options.
+    spec:
+      tls: []
+  
+  # StatefulSet defines options for vCluster statefulSet deployed by Helm.
+  statefulSet:
+    labels: {}
+    annotations: {}
+    # ImagePullPolicy is the policy how to pull the image.
+    imagePullPolicy: ""
+    # Image is the image for the controlPlane statefulSet container
+    image:
+      # Configure the registry of the container image, e.g. my-registry.com or ghcr.io
+      # It defaults to ghcr.io and can be overriding either by using this field or controlPlane.advanced.defaultImageRegistry
+      registry: "ghcr.io"
+      # Configure the repository of the container image, e.g. my-repo/my-image.
+      # It defaults to the vCluster pro repository that includes the optional pro modules that are turned off by default.
+      # If you still want to use the pure OSS build, use 'loft-sh/vcluster-oss' instead.
+      repository: "loft-sh/vcluster-pro"
+      # Tag is the tag of the container image, e.g. latest
+      tag: ""
+    # WorkingDir specifies in what folder the main process should get started.
+    workingDir: ""
+    # Command allows you to override the main command.
+    command: []
+    # Args allows you to override the main arguments.
+    args: []
+    # Env are additional environment variables for the statefulSet container.
+    env: []
+    # Resources are the resource requests and limits for the statefulSet container.
+    resources:
+      # Limits are resource limits for the container
+      limits:
+        ephemeral-storage: 8Gi
+        memory: 2Gi
+      # Requests are minimal resources that will be consumed by the container
+      requests:
+        ephemeral-storage: 400Mi
+        cpu: 200m
+        memory: 256Mi
+    # Additional labels or annotations for the statefulSet pods.
+    pods:
+      labels: {}
+      annotations: {}
+    # HighAvailability holds options related to high availability.
+    highAvailability:
+      # Replicas is the amount of replicas to use for the statefulSet.
+      replicas: 1
+      # LeaseDuration is the time to lease for the leader.
+      leaseDuration: 60
+      # RenewDeadline is the deadline to renew a lease for the leader.
+      renewDeadline: 40
+      # RetryPeriod is the time until a replica will retry to get a lease.
+      retryPeriod: 15
+    # Security defines pod or container security context.
+    security:
+      # PodSecurityContext specifies security context options on the pod level.
+      podSecurityContext: {}
+      # ContainerSecurityContext specifies security context options on the container level.
+      containerSecurityContext:
+        allowPrivilegeEscalation: false
+        runAsUser: 0
+        runAsGroup: 0
+    # Persistence defines options around persistence for the statefulSet.
+    persistence:
+      # VolumeClaim can be used to configure the persistent volume claim.
+      volumeClaim:
+        # Enabled enables deploying a persistent volume claim. If auto, vCluster will automatically determine
+        # based on the chosen distro and other options if this is required.
+        enabled: auto
+        # RetentionPolicy is the persistent volume claim retention policy.
+        retentionPolicy: Retain
+        # Size is the persistent volume claim storage size.
+        size: 5Gi
+        # StorageClass is the persistent volume claim storage class.
+        storageClass: ""
+        # AccessModes are the persistent volume claim access modes.
+        accessModes: ["ReadWriteOnce"]
+      # VolumeClaimTemplates defines the volumeClaimTemplates for the statefulSet
+      volumeClaimTemplates: []
+      # AddVolumeMounts defines extra volume mounts for the container
+      addVolumeMounts: []
+      # AddVolumes defines extra volumes for the pod
+      addVolumes: []
+      # BinariesVolume defines a binaries volume that is used to retrieve
+      # distro specific executables to be run by the syncer controller.
+      # This volume doesn't need to be persistent.
+      binariesVolume:
+        - name: binaries
+          emptyDir: {}
+    # EnableServiceLinks for the StatefulSet pod
+    enableServiceLinks: true
+    # Scheduling holds options related to scheduling.
+    scheduling:
+      # PodManagementPolicy is the statefulSet pod management policy.
+      podManagementPolicy: Parallel
+      # TopologySpreadConstraints are the topology spread constraints for the pod.
+      topologySpreadConstraints: []
+      # PriorityClassName is the priority class name for the the pod.
+      priorityClassName: ""
+      # NodeSelector is the node selector to apply to the pod.
+      nodeSelector: {}
+      # Affinity is the affinity to apply to the pod.
+      affinity: {}
+      # Tolerations are the tolerations to apply to the pod.
+      tolerations: []
+    # Probes enables or disables the main container probes.
+    probes:
+      # LivenessProbe specifies if the liveness probe for the container should be enabled
+      livenessProbe:
+        enabled: true
+      # ReadinessProbe specifies if the readiness probe for the container should be enabled
+      readinessProbe:
+        enabled: true
+      # StartupProbe specifies if the startup probe for the container should be enabled
+      startupProbe:
+        enabled: true
+  
+  # ServiceMonitor can be used to automatically create a service monitor for vCluster deployment itself.
+  serviceMonitor:
+    # Enabled configures if Helm should create the service monitor.
+    enabled: false
+    labels: {}
+    annotations: {}
+  
+  # Advanced holds additional configuration for the vCluster control plane.
+  advanced:
+    # DefaultImageRegistry will be used as a prefix for all internal images deployed by vCluster or Helm. This makes it easy to
+    # upload all required vCluster images to a single private repository and set this value. Workload images are not affected by this.
+    defaultImageRegistry: ""
+    # VirtualScheduler defines if a scheduler should be used within the virtual cluster or the scheduling decision for workloads will be made by the host cluster.
+    virtualScheduler:
+      enabled: false
+    # ServiceAccount specifies options for the vCluster control plane service account.
+    serviceAccount:
+      # Enabled specifies if the service account should get deployed.
+      enabled: true
+      # Name specifies what name to use for the service account.
+      name: ""
+      # ImagePullSecrets defines extra image pull secrets for the service account.
+      imagePullSecrets: []
+      labels: {}
+      annotations: {}
+    # WorkloadServiceAccount specifies options for the service account that will be used for the workloads that run within the virtual cluster.
+    workloadServiceAccount:
+      # Enabled specifies if the service account for the workloads should get deployed.
+      enabled: true
+      # Name specifies what name to use for the service account for the virtual cluster workloads.
+      name: ""
+      # ImagePullSecrets defines extra image pull secrets for the workload service account.
+      imagePullSecrets: []
+      annotations: {}
+      labels: {}
+    # HeadlessService specifies options for the headless service used for the vCluster StatefulSet.
+    headlessService:
+      labels: {}
+      annotations: {}
+    # GlobalMetadata is metadata that will be added to all resources deployed by Helm.
+    globalMetadata:
+      annotations: {}
+
+# Integrations holds config for vCluster integrations with other operators or tools running on the host cluster
+integrations:
+  # MetricsServer reuses the metrics server from the host cluster within the vCluster.
+  metricsServer:
+    # Enabled signals the metrics server integration should be enabled.
+    enabled: false
+    # Nodes defines if metrics-server nodes api should get proxied from host to virtual cluster.
+    nodes: true
+    # Pods defines if metrics-server pods api should get proxied from host to virtual cluster.
+    pods: true
+  
+  # KubeVirt reuses a host kubevirt and makes certain CRDs from it available inside the vCluster
+  kubeVirt:
+    # Enabled signals if the integration should be enabled
+    enabled: false
+    # Webhook holds configuration for enabling the webhook within the vCluster
+    webhook:
+      enabled: true
+    # Sync holds configuration on what resources to sync
+    sync:
+      # If DataVolumes should get synced
+      dataVolumes:
+        enabled: false
+      # If VirtualMachines should get synced
+      virtualMachines:
+        enabled: true
+      # If VirtualMachineInstances should get synced
+      virtualMachineInstances:
+        enabled: true
+      # If VirtualMachinePools should get synced
+      virtualMachinePools:
+        enabled: true
+      # If VirtualMachineClones should get synced
+      virtualMachineClones:
+        enabled: true
+      # If VirtualMachineInstanceMigrations should get synced
+      virtualMachineInstanceMigrations:
+        enabled: true
+
+# RBAC options for the virtual cluster.
+rbac:
+  # Role holds virtual cluster role configuration
+  role:
+    # Enabled defines if the role should be enabled or disabled.
+    enabled: true
+    # OverwriteRules will overwrite the role rules completely.
+    overwriteRules: []
+    # ExtraRules will add rules to the role.
+    extraRules: []
+  
+  # ClusterRole holds virtual cluster cluster role configuration
+  clusterRole:
+    # Enabled defines if the cluster role should be enabled or disabled. If auto, vCluster automatically determines whether the virtual cluster requires a cluster role.
+    enabled: auto
+    # OverwriteRules will overwrite the cluster role rules completely.
+    overwriteRules: []
+    # ExtraRules will add rules to the cluster role.
+    extraRules: []
+
+# Networking options related to the virtual cluster.
+networking:
+  # ReplicateServices allows replicating services from the host within the virtual cluster or the other way around.
+  replicateServices:
+    # ToHost defines the services that should get synced from virtual cluster to the host cluster. If services are
+    # synced to a different namespace than the virtual cluster is in, additional permissions for the other namespace
+    # are required.
+    toHost: []
+    # FromHost defines the services that should get synced from the host to the virtual cluster.
+    fromHost: []
+  
+  # ResolveDNS allows to define extra DNS rules. This only works if embedded coredns is configured.
+  resolveDNS: []
+  
+  # Advanced holds advanced network options.
+  advanced:
+    # ClusterDomain is the Kubernetes cluster domain to use within the virtual cluster.
+    clusterDomain: "cluster.local"
+    # FallbackHostCluster allows to fallback dns to the host cluster. This is useful if you want to reach host services without
+    # any other modification. You will need to provide a namespace for the service, e.g. my-other-service.my-other-namespace
+    fallbackHostCluster: false
+    # ProxyKubelets allows rewriting certain metrics and stats from the Kubelet to "fake" this for applications such as
+    # prometheus or other node exporters.
+    proxyKubelets:
+      # ByHostname will add a special vCluster hostname to the nodes where the node can be reached at. This doesn't work
+      # for all applications, e.g. Prometheus requires a node IP.
+      byHostname: true
+      # ByIP will create a separate service in the host cluster for every node that will point to virtual cluster and will be used to
+      # route traffic.
+      byIP: true
+
+# Policies to enforce for the virtual cluster deployment as well as within the virtual cluster.
+policies:
+  # ResourceQuota specifies resource quota options.
+  resourceQuota:
+    # Enabled defines if the resource quota should be enabled.
+    enabled: false
+    labels: {}
+    annotations: {}
+    # Quota are the quota options
     quota:
       requests.cpu: 10
       requests.memory: 20Gi
@@ -461,80 +804,136 @@ isolation:
       count/secrets: 100
       count/configmaps: 100
       count/persistentvolumeclaims: 20
+    # ScopeSelector is the resource quota scope selector
     scopeSelector:
-      matchExpressions:
-    scopes:
-
+      matchExpressions: []
+    # Scopes are the resource quota scopes
+    scopes: []
+  
+  # LimitRange specifies limit range options.
   limitRange:
-    enabled: true
+    # Enabled defines if the limit range should be deployed by vCluster.
+    enabled: false
+    labels: {}
+    annotations: {}
+    # Default are the default limits for the limit range
     default:
       ephemeral-storage: 8Gi
       memory: 512Mi
       cpu: "1"
+    # DefaultRequest are the default request options for the limit range
     defaultRequest:
       ephemeral-storage: 3Gi
       memory: 128Mi
       cpu: 100m
-
+  
+  # NetworkPolicy specifies network policy options.
   networkPolicy:
-    enabled: true
+    # Enabled defines if the network policy should be deployed by vCluster.
+    enabled: false
+    labels: {}
+    annotations: {}
+    fallbackDns: 8.8.8.8
     outgoingConnections:
+      # IPBlock describes a particular CIDR (Ex. "192.168.1.0/24","2001:db8::/64") that is allowed
+      # to the pods matched by a NetworkPolicySpec's podSelector. The except entry describes CIDRs
+      # that should not be included within this rule.
       ipBlock:
+        # cidr is a string representing the IPBlock
+        # Valid examples are "192.168.1.0/24" or "2001:db8::/64"
         cidr: 0.0.0.0/0
+        # except is a slice of CIDRs that should not be included within an IPBlock
+        # Valid examples are "192.168.1.0/24" or "2001:db8::/64"
+        # Except values will be rejected if they are outside the cidr range
+        # +optional
         except:
           - 100.64.0.0/10
           - 127.0.0.0/8
           - 10.0.0.0/8
           - 172.16.0.0/12
           - 192.168.0.0/16
+  
+  # CentralAdmission defines what validating or mutating webhooks should be enforced within the virtual cluster.
+  centralAdmission:
+    # ValidatingWebhooks are validating webhooks that should be enforced in the virtual cluster
+    validatingWebhooks: []
+    # MutatingWebhooks are mutating webhooks that should be enforced in the virtual cluster
+    mutatingWebhooks: []
 
-# manifests to setup when initializing a vcluster
-init:
-  manifests: |-
-    ---
-  # The contents of manifests-template will be templated using helm
-  # this allows you to use helm values inside, e.g.: {{ .Release.Name }}
-  manifestsTemplate: ''
-  helm: []
-    # - bundle: <string> - base64-encoded .tar.gz file content (optional - overrides chart.repo)
-    #   chart:
-    #     name: <string>  REQUIRED
-    #     version: <string>  REQUIRED
-    #     repo: <string>  (optional when bundle is used)
-    #     username: <string>   (if required for repo)
-    #     password: <string>   (if required for repo)
-    #     insecure: boolean    (if required for repo)
-    #   release:
-    #     name: <string> REQUIRED
-    #     namespace: <string> REQUIRED
-    #     timeout: number
-    #   values: |-  string YAML object
-    #     foo: bar
-    #   valuesTemplate: |-  string YAML object
-    #     foo: {{ .Release.Name }}
+# ExportKubeConfig describes how vCluster should export the vCluster kubeConfig file.
+exportKubeConfig:
+  # Context is the name of the context within the generated kubeconfig to use.
+  context: ""
+  
+  # Override the default https://localhost:8443 and specify a custom hostname for the generated kubeconfig.
+  server: ""
+  
+  # Declare in which host cluster secret vCluster should store the generated virtual cluster kubeconfig.
+  # If this is not defined, vCluster create it with `vc-NAME`. If you specify another name,
+  # vCluster creates the config in this other secret.
+  secret:
+    # Name is the name of the secret where the kubeconfig should get stored.
+    name: ""
+    # Namespace where vCluster should store the kubeconfig secret. If this is not equal to the namespace
+    # where you deployed vCluster, you need to make sure vCluster has access to this other namespace.
+    namespace: ""
 
-multiNamespaceMode:
-  enabled: false
+# External holds configuration for tools that are external to the vCluster.
+external: {}
 
+# Define which vCluster plugins to load.
+plugins: {}
+
+# Experimental features for vCluster. Configuration here might change, so be careful with this.
+experimental:
+  # MultiNamespaceMode tells virtual cluster to sync to multiple namespaces instead of a single one. This will map each virtual cluster namespace to a single namespace in the host cluster.
+  multiNamespaceMode:
+    # Enabled specifies if multi namespace mode should get enabled
+    enabled: false
+  
+  # SyncSettings are advanced settings for the syncer controller.
+  syncSettings:
+    # DisableSync will not sync any resources and disable most control plane functionality.
+    disableSync: false
+    # SyncLabels are labels that should get not rewritten when syncing from the virtual cluster.
+    syncLabels: []
+    # RewriteKubernetesService will rewrite the Kubernetes service to point to the vCluster service if disableSync is enabled
+    rewriteKubernetesService: false
+    # TargetNamespace is the namespace where the workloads should get synced to.
+    targetNamespace: ""
+    # SetOwner specifies if vCluster should set an owner reference on the synced objects to the vCluster service. This allows for easy garbage collection.
+    setOwner: true
+  
+  # IsolatedControlPlane is a feature to run the vCluster control plane in a different Kubernetes cluster than the workloads themselves.
+  isolatedControlPlane:
+    # Headless states that Helm should deploy the vCluster in headless mode for the isolated control plane.
+    headless: false
+  
+  # Deploy allows you to configure manifests and Helm charts to deploy within the virtual cluster.
+  deploy:
+    # Host defines what manifests to deploy into the host cluster
+    host:
+      # Manifests are raw Kubernetes manifests that should get applied within the virtual cluster.
+      manifests: ""
+      # ManifestsTemplate is a Kubernetes manifest template that will be rendered with vCluster values before applying it within the virtual cluster.
+      manifestsTemplate: ""
+    # VCluster defines what manifests and charts to deploy into the vCluster
+    vcluster:
+      # Manifests are raw Kubernetes manifests that should get applied within the virtual cluster.
+      manifests: ""
+      # ManifestsTemplate is a Kubernetes manifest template that will be rendered with vCluster values before applying it within the virtual cluster.
+      manifestsTemplate: ""
+      # Helm are Helm charts that should get deployed into the virtual cluster
+      helm: []
+  
+  # GenericSync holds options to generically sync resources from virtual cluster to host.
+  genericSync:
+    clusterRole:
+      extraRules: []
+    role:
+      extraRules: []
+
+# Configuration related to telemetry gathered about vCluster usage.
 telemetry:
-  disabled: false
-  instanceCreator: "helm"
-  platformUserID: ""
-  platformInstanceID: ""
-  machineID: ""
-
-noopSyncer:
-  enabled: false
-  synck8sService: false
-
-  # Secret containing remote cluster configuration
-  # (should have the following keys defined)
-  #   serverCaCert: <server-ca-cert of the remote cluster>
-  #   serverCaKey: <server-ca-key of the remote cluster>
-  #   clientCaCert: <client-ca-cert of the remote cluster>
-  #   requestHeaderCaCert: <request-header-ca-cert of the remote cluster>
-  #   kubeConfig: <kubeconfig of the remote cluster>
-  #
-  #secret: ""
-
-
+  # Enabled specifies that the telemetry for the vCluster control plane should be enabled.
+  enabled: true
