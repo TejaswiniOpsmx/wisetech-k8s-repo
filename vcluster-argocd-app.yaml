@@ -7,7 +7,7 @@ spec:
   project: default
   destination:
     name: 'in-cluster'
-    namespace: vcluster-vc-argocd-2-11-4
+    namespace: vcluster-vc-argocd-2-9-6
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
@@ -16,9 +16,10 @@ spec:
       targetRevision: 0.20.0-beta.12
       helm:
         valueFiles:
-          - $values/vcluster/values.yaml
-          - $values/vcluster/vc-argo-2-11-4-values.yaml
-        releaseName: vc-argo-2-11-4
+          - $values/vc/values.yaml
+          - $values/vc/local-values.yaml
+          - $values/vc/vc-argo-2-9-6-values.yaml
+        releaseName: vc-argo-2-9-6
       chart: vcluster
     - repoURL: 'https://github.com/gopaljayanthi/wisetech-k8s-repo.git'
       targetRevision: master
