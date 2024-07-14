@@ -1,0 +1,20 @@
+helm:
+  parameters:
+  - name: app.image.name
+    value: docker.io/gopalvithaljayanthi/nginx
+    forcestring: true
+  - name: app.image.tag
+    value: mybranch-1292
+    forcestring: true
+  - name: external.image.name
+    value: docker.io/gopalvithaljayanthi/nginx
+    forcestring: true
+  - name: external.image.tag
+    value: mybranch-1292
+    forcestring: true
+  - name: es-sync.image.name
+    value: docker.io/gopalvithaljayanthi/nginx
+    forcestring: true
+  - name: es-sync.image.tag
+    value: mybranch-1292
+    forcestring: true
