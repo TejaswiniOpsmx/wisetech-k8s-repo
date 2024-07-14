@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Check if the required argument is provided
-if [ "$#" -ne 1 ]; then
-  echo "Usage: $0 <path-to-yaml-file>, the yaml file should be a values.yaml from a mainchart"
+if [ "$#" -ne 2 ]; then
+  echo "Usage: $0 <path-to-yaml-file> <appname>, the yaml file should be a values.yaml from a mainchart"
   exit 1
 fi
 
@@ -14,6 +14,8 @@ if [ ! -f "$input_file" ]; then
   echo "File not found: $input_file"
   exit 1
 fi
+
+appname=$2
 
 # Create a temporary YAML file
 tmpfile=$(mktemp /tmp/apps.XXXXXX.yaml)
