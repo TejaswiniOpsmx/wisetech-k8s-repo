@@ -3,7 +3,7 @@ kind: Job
 metadata:
   name: liquibase-job
   annotations:
-    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-wave: "-1"
     argocd.argoproj.io/sync-options: Validate=false
     argocd.argoproj.io/sync-options: Force=true,Replace=true
 spec:
