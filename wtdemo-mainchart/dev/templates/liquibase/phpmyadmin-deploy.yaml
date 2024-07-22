@@ -1,6 +1,8 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  annotation:
+    argocd.argoproj.io/sync-wave: "-2"        
   name: phpmyadmin
 spec:
   replicas: 1
