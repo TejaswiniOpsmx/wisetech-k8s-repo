@@ -5,18 +5,8 @@ metadata:
     argocd.argoproj.io/sync-wave: "-2"        
   name: liquibase-changelog-config
 data:
-  db.changelog-master.xml: |
-<?xml version="1.0" encoding="UTF-8"?>
-    <databaseChangeLog
-          xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-              http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
-  
-          <include file="changelog/changelog_1_create_example_table.xml"/>
-    </databaseChangeLog>          
   changelog_1_create_example_table.xml: |
-<?xml version="1.0" encoding="UTF-8"?>
+    <?xml version="1.0" encoding="UTF-8"?>
     <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -33,4 +23,14 @@ data:
                 </column>
             </createTable>
         </changeSet>
+    </databaseChangeLog>
+  db.changelog-master.xml: |
+    <?xml version="1.0" encoding="UTF-8"?>
+    <databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+        
+        <include file="changelog/changelog_1_create_example_table.xml"/>
     </databaseChangeLog>
