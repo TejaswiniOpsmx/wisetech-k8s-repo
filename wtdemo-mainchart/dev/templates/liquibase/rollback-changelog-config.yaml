@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  annotation:
+  annotations:
     argocd.argoproj.io/sync-wave: "-2"        
   name: liquibase-rollback-changelog-config
 data:
