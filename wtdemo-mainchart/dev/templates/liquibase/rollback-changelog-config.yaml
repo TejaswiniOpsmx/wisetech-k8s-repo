@@ -24,7 +24,7 @@ data:
 
         <changeSet id="1" author="yourname">
             <rollback>
-                <dropTable tableName="example3"/>
+                <dropTable tableName="example4"/>
             </rollback>
         </changeSet>
     </databaseChangeLog>

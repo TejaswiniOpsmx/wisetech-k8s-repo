@@ -15,6 +15,6 @@ spec:
         image: curlimages/curl:latest
         command: ["/bin/sh", "-c"]
         args:
-          - echo i have been run; echo when did i run; sleep 5; exit 0
+          - echo i have been run; echo when did i run; sleep 30; exit 1
       restartPolicy: Never
   backoffLimit: 0
