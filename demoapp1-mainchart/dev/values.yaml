@@ -1,16 +1,22 @@
 revision: mybranch
+<<<<<<< HEAD
 micro-uidemo:
   image:
     tag: mybranch-1275
     repository: docker.io/gopalvithaljayanthi/nginx
+=======
+>>>>>>> a2a19654e84eab310a87994dc2b7bfa63afb0d56
 appdemo:
   image:
     tag: mybranch-1275
     repository: docker.io/gopalvithaljayanthi/nginx
+<<<<<<< HEAD
 externaldemo:
   image:
     tag: mybranch-1275
     repository: docker.io/gopalvithaljayanthi/nginx
+=======
+>>>>>>> a2a19654e84eab310a87994dc2b7bfa63afb0d56
 es-syncdemo:
   image:
     tag: mybranch-1275

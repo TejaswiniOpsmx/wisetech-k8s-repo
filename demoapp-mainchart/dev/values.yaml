@@ -1,0 +1,17 @@
+revision: mybranch
+micro-uibenda:
+  image:
+    tag: mybranch-1276
+    repository: docker.io/gopalvithaljayanthi/nginx
+externalbenda:
+  image:
+    tag: mybranch-1276
+    repository: docker.io/gopalvithaljayanthi/nginx
+appbenda:
+  image:
+    tag: mybranch-1276
+    repository: docker.io/gopalvithaljayanthi/nginx
+es-syncbenda:
+  image:
+    tag: mybranch-1275
+    repository: docker.io/gopalvithaljayanthi/nginx

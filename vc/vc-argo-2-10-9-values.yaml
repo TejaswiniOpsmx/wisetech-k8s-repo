@@ -1,0 +1,23 @@
+controlPlane:
+  proxy:
+    extraSANs:
+      - vc-argocd-2-10-9.jpmc.opsmx.net
+  ingress:
+    host: vc-argocd-2-10-9.jpmc.opsmx.net
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-staging
+  # Ingress TLS configuration
+    spec:
+      tls:
+        - secretName: tls-vcluster.local
+          hosts:
+          - vc-argocd-2-10-9.jpmc.opsmx.net
+exportKubeConfig:
+  context: "vc-argocd-2-10-9"
+  server: "https://vc-argocd-2-10-9.jpmc.opsmx.net:443"
+  secret:
+    # Name is the name of the secret where the kubeconfig should get stored.
+    name: "vc-argocd-2-10-9-kubeconfig-secret"
+    # Namespace where vCluster should store the kubeconfig secret. If this is not equal to the namespace
+    # where you deployed vCluster, you need to make sure vCluster has access to this other namespace.
+    namespace: "vcluster-vc-argocd-2-10-9"

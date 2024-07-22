@@ -1,0 +1,52 @@
+sync:
+  toHost:
+    serviceAccounts:
+      enabled: true
+    services:
+      enabled: true
+    ingresses:
+      enabled: true
+  fromHost:
+    nodes:
+      enabled: true
+      clearImageStatus: true
+    ingressClasses:
+      enabled: true
+controlPlane:
+  proxy:
+    extraSANs:
+      - {{ .Values.username }}.{{ .Values.hostname }}
+  ingress:
+  # Enable ingress record generation
+    enabled: true
+  # Ingress path type
+    pathType: ImplementationSpecific
+   # ingressClassName: "nginx"
+    host: {{ .Values.username }}.{{ .Values.hostname }}
+    annotations:
+      nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+      nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      cert-manager.io/cluster-issuer: letsencrypt-staging
+      #kubernetes.io/ingress.class: nginx
+  # Ingress TLS configuration
+    spec:
+      ingressClassName: nginx
+      tls:
+        - secretName: tls-vcluster.local
+          hosts:
+          - {{ .Values.username }}.{{ .Values.hostname }}
+exportKubeConfig:
+  # Context is the name of the context within the generated kubeconfig to use.
+  context: "gopal-vc"
+  # Override the default https://localhost:8443 and specify a custom hostname for the generated kubeconfig.
+  server: "https://{{ .Values.username }}.{{ .Values.hostname }}:443"
+  # Declare in which host cluster secret vCluster should store the generated virtual cluster kubeconfig.
+  # If this is not defined, vCluster create it with `vc-NAME`. If you specify another name,
+  # vCluster creates the config in this other secret.
+  secret:
+    # Name is the name of the secret where the kubeconfig should get stored.
+    name: "{{ .Values.username }}-kubeconfig-secret"
+    # Namespace where vCluster should store the kubeconfig secret. If this is not equal to the namespace
+    # where you deployed vCluster, you need to make sure vCluster has access to this other namespace.
+    namespace: {{ .Values.username }}

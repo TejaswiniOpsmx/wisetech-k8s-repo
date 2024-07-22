@@ -1,0 +1,47 @@
+name: argocd triggered webhook
+on:
+  repository_dispatch:
+    types: [argocd-event]
+
+jobs:
+  run:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    - name: Set Application Name
+      id: set_app_name
+      run: echo "::set-output name=app_name::${{ github.event.client_payload['argocd-application-name'] }}"
+    - name: Set Application Sync Status
+      id: set_app_sync_status
+      run: echo "::set-output name=app_sync_status::${{ github.event.client_payload['argocd-application-sync-status'] }}"
+    - name: Set Application Health Status
+      id: set_app_health_status
+      run: echo "::set-output name=app_health_status::${{ github.event.client_payload['argocd-application-health'] }}"
+    - name: Echo application info
+      run: |
+        echo the application that triggered this was ${{ steps.set_app_name.outputs.app_name }} and its sync status is ${{ steps.set_app_sync_status.outputs.app_sync_status }} and its health status is ${{ steps.set_app_health_status.outputs.app_health_status }}
+    - name: Check conditions
+      id: check_conditions
+      run: |
+        if [ "${{ steps.set_app_name.outputs.app_name }}" == "mainchart-dev" ] && \
+           [ "${{ steps.set_app_sync_status.outputs.app_sync_status }}" == "Synced" ] && \
+           [ "${{ steps.set_app_health_status.outputs.app_health_status }}" == "Healthy" ]; then
+          echo "::set-output name=conditions_met::true"
+        else
+          echo "::set-output name=conditions_met::false"
+        fi
+
+    # Conditional steps based on the above conditions
+    - name: Copy and commit files
+      if: steps.check_conditions.outputs.conditions_met == 'true'
+      run: |
+        cp mainchart/.argocd-source-mainchart-dev.yaml mainchart/.argocd-source-mainchart-qa.yaml
+        cp mainchart/.argocd-source-mainchart-dev.yaml mainchart/.argocd-source-mainchart-perf.yaml
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        git add mainchart/.argocd-source-mainchart-qa.yaml mainchart/.argocd-source-mainchart-perf.yaml
+        git commit -m "Copy mainchart-dev to mainchart-qa and mainchart-perf"
+        git push

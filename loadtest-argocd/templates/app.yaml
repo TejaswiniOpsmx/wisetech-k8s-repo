@@ -1,0 +1,18 @@
+{{ range .Values.apps }} 
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{.name}}
+  namespace: test
+spec:
+  destination:
+    namespace: cm
+    name: in-cluster
+  project: default
+  syncPolicy: {}
+  source:
+    repoURL: "https://github.com/gopaljayanthi/forjpmc"
+    targetRevision: "master"
+    path: "cm"
+{{- end }}

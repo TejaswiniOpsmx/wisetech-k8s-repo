@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: create-vcluster
+  namespace: argocd
+spec:
+  project: default
+  destination:
+    name: 'in-cluster'
+    namespace: vcluster-vc-argocd-2-9-6
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+  sources:
+    - repoURL: 'https://charts.loft.sh'
+      targetRevision: 0.20.0-beta.12
+      helm:
+        valueFiles:
+          - $values/vc/values.yaml
+          - $values/vc/local-values.yaml
+          - $values/vc/vc-argo-2-9-6-values.yaml
+        releaseName: vc-argo-2-9-6
+      chart: vcluster
+    - repoURL: 'https://github.com/gopaljayanthi/wisetech-k8s-repo.git'
+      targetRevision: master
+      ref: values

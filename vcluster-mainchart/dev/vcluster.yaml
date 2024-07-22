@@ -1,0 +1,36 @@
+controlPlane:
+  backingStore:
+    etcd:
+      embedded:
+        enabled: false
+  ingress:
+    enabled: true
+    host: vclustery.wisetech.opsmx.net
+    pathType: ImplementationSpecific
+    ingressClassName: "nginx"
+    annotations:
+      nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+      nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # Ingress TLS configuration
+    tls:
+     - secretName: tls-vcluster.local
+       hosts:
+         - vclustery.wisetech.opsmx.net
+sync:
+  toHost:
+    serviceAccounts:
+      enabled: true
+    services:
+      enabled: true
+    ingresses:
+      enabled: true 
+  fromHost:
+    nodes:
+      enabled: true
+      clearImageStatus: true
+exportKubeConfig:
+  context: my-vcluster-context
+  server: https://vclustery.wisetech.opsmx.net
+  secret:
+    name: my-vcluster-kubeconfig      

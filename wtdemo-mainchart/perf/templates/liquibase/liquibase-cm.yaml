@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: liquibase-config
+data:
+  liquibase.properties: |
+    driver: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://mysql:3306/mydb
+    username: myuser
+    password: mypassword
+    changeLogFile: changelog/db.changelog-master.xml
+    logLevel: info

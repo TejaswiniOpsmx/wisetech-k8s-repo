@@ -5,6 +5,7 @@ type: application
 version: 0.1.0
 appVersion: "1.16.0"
 dependencies:
+<<<<<<< HEAD
   - name: micro-uidemo
     version: 0.1.0
     repository: file://../../demoapp1/micro-uidemo/chart/uat
@@ -14,6 +15,11 @@ dependencies:
   - name: externaldemo
     version: 0.1.0
     repository: file://../../demoapp1/externaldemo/chart/uat
+=======
+  - name: appdemo
+    version: 0.1.0
+    repository: file://../../demoapp1/appdemo/chart/uat
+>>>>>>> a2a19654e84eab310a87994dc2b7bfa63afb0d56
   - name: es-syncdemo
     version: 0.1.0
     repository: file://../../demoapp1/es-syncdemo/chart/uat

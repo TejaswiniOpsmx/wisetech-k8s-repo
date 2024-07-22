@@ -1,7 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
+<<<<<<< HEAD
   name: es-sync
+=======
+  name: es-sync-demo
+>>>>>>> a2a19654e84eab310a87994dc2b7bfa63afb0d56
   labels:
     name: es-sync
 spec:

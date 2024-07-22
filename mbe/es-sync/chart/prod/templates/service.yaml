@@ -1,14 +1,1 @@
-apiVersion: v1
-kind: Service
-metadata:
-  name: es-sync
-  labels:
-    name: es-sync
-spec:
-  type: ClusterIP
-  ports:
-    - port: 8272
-      targetPort: 80
-      protocol: TCP
-  selector:
-    name: es-sync
+../../../deployment/prod/service.yaml

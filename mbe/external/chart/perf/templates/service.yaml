@@ -1,14 +1,1 @@
-apiVersion: v1
-kind: Service
-metadata:
-  name: external
-  labels:
-    name: external
-spec:
-  type: ClusterIP
-  ports:
-    - port: 8272
-      targetPort: 80
-      protocol: TCP
-  selector:
-    name: external
+../../../deployment/perf/service.yaml
