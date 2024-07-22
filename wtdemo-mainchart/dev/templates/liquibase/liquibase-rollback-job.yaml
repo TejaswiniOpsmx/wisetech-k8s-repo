@@ -1,0 +1,40 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: liquibase-rollback-job
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+    argocd.argoproj.io/sync-options: Validate=false
+    argocd.argoproj.io/sync-options: Force=true,Replace=true
+    argocd.argoproj.io/hook: SyncFail
+spec:
+  template:
+    metadata:
+      labels:
+        app: liquibase
+    spec:
+      containers:
+      - name: liquibase
+        image: gopalvithaljayanthi/liquibase-mysql:v1
+        command: ["sh", "-c"]
+        args:
+        - |
+          liquibase --defaultsFile=/liquibase/liquibase.properties update
+        env:
+        - name: JAVA_OPTS
+          value: "-Dfile.encoding=UTF-8"
+        volumeMounts:
+        - name: liquibase-config-volume
+          mountPath: /liquibase/liquibase.properties
+          subPath: liquibase.properties
+        - name: changelog-volume
+          mountPath: /liquibase/changelog
+      restartPolicy: Never
+      volumes:
+      - name: liquibase-config-volume
+        configMap:
+          name: liquibase-config
+      - name: changelog-volume
+        configMap:
+          name: liquibase-rollback-changelog-config
+  backoffLimit: 4
