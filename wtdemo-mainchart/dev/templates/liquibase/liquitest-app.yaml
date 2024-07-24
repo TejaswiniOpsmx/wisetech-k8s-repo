@@ -1,0 +1,223 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  creationTimestamp: "2024-07-22T14:00:17Z"
+  generation: 63
+  name: liquitest
+  namespace: argocd
+  resourceVersion: "24109556"
+  uid: c09a14ba-e45f-4fe4-bc57-dcac818c1ef0
+spec:
+  destination:
+    namespace: liquitest
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: wtdemo-mainchart/dev
+    repoURL: https://github.com/gopaljayanthi/wisetech-k8s-repo.git
+    targetRevision: HEAD
+  syncPolicy:
+    syncOptions:
+    - CreateNamespace=true
+status:
+  controllerNamespace: argocd
+  health:
+    status: Healthy
+  history:
+  - deployStartedAt: "2024-07-22T14:06:27Z"
+    deployedAt: "2024-07-22T14:06:49Z"
+    id: 0
+    initiatedBy:
+      username: admin
+    revision: aa3c340c58eeb455c008d547f1de429fdd20d6d2
+    source:
+      path: wtdemo-mainchart/dev
+      repoURL: https://github.com/gopaljayanthi/wisetech-k8s-repo.git
+      targetRevision: HEAD
+  operationState:
+    finishedAt: "2024-07-22T14:09:38Z"
+    message: successfully synced (all tasks run)
+    operation:
+      initiatedBy:
+        username: admin
+      retry: {}
+      sync:
+        prune: true
+        resources:
+        - kind: Service
+          name: phpmyadmin
+          namespace: liquitest
+        revision: aa3c340c58eeb455c008d547f1de429fdd20d6d2
+        syncOptions:
+        - CreateNamespace=true
+        syncStrategy:
+          hook: {}
+    phase: Succeeded
+    startedAt: "2024-07-22T14:09:38Z"
+    syncResult:
+      resources:
+      - group: ""
+        hookPhase: Running
+        kind: Service
+        message: service/phpmyadmin unchanged
+        name: phpmyadmin
+        namespace: liquitest
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      revision: aa3c340c58eeb455c008d547f1de429fdd20d6d2
+      source:
+        path: wtdemo-mainchart/dev
+        repoURL: https://github.com/gopaljayanthi/wisetech-k8s-repo.git
+        targetRevision: HEAD
+  reconciledAt: "2024-07-22T14:09:53Z"
+  resources:
+  - kind: ConfigMap
+    name: liquibase-changelog-config
+    namespace: liquitest
+    status: Synced
+    syncWave: -2
+    version: v1
+  - kind: ConfigMap
+    name: liquibase-config
+    namespace: liquitest
+    status: Synced
+    syncWave: -2
+    version: v1
+  - kind: ConfigMap
+    name: liquibase-rollback-changelog-config
+    namespace: liquitest
+    status: Synced
+    syncWave: -2
+    version: v1
+  - health:
+      status: Healthy
+    kind: Service
+    name: app
+    namespace: liquitest
+    status: Synced
+    version: v1
+  - health:
+      status: Healthy
+    kind: Service
+    name: es-sync
+    namespace: liquitest
+    status: Synced
+    version: v1
+  - health:
+      status: Healthy
+    kind: Service
+    name: external
+    namespace: liquitest
+    status: Synced
+    version: v1
+  - health:
+      status: Healthy
+    kind: Service
+    name: micro-ui
+    namespace: liquitest
+    status: Synced
+    version: v1
+  - health:
+      status: Healthy
+    kind: Service
+    name: mysql
+    namespace: liquitest
+    status: Synced
+    syncWave: -2
+    version: v1
+  - health:
+      status: Healthy
+    kind: Service
+    name: phpmyadmin
+    namespace: liquitest
+    status: Synced
+    syncWave: -2
+    version: v1
+  - group: apps
+    health:
+      status: Healthy
+    kind: Deployment
+    name: app
+    namespace: liquitest
+    status: Synced
+    version: v1
+  - group: apps
+    health:
+      status: Healthy
+    kind: Deployment
+    name: es-sync
+    namespace: liquitest
+    status: Synced
+    version: v1
+  - group: apps
+    health:
+      status: Healthy
+    kind: Deployment
+    name: external
+    namespace: liquitest
+    status: Synced
+    version: v1
+  - group: apps
+    health:
+      status: Healthy
+    kind: Deployment
+    name: micro-ui
+    namespace: liquitest
+    status: Synced
+    version: v1
+  - group: apps
+    health:
+      status: Healthy
+    kind: Deployment
+    name: mysql
+    namespace: liquitest
+    status: Synced
+    syncWave: -2
+    version: v1
+  - group: apps
+    health:
+      status: Healthy
+    kind: Deployment
+    name: phpmyadmin
+    namespace: liquitest
+    status: Synced
+    syncWave: -2
+    version: v1
+  - group: batch
+    health:
+      status: Healthy
+    kind: Job
+    name: liquibase-job
+    namespace: liquitest
+    status: Synced
+    syncWave: -1
+    version: v1
+  - group: batch
+    health:
+      status: Healthy
+    kind: Job
+    name: run-tests
+    namespace: liquitest
+    status: Synced
+    syncWave: 5
+    version: v1
+  sourceType: Helm
+  summary:
+    images:
+    - curlimages/curl:latest
+    - docker.io/gopalvithaljayanthi/nginx:mybranch-1275
+    - gopalvithaljayanthi/liquibase-mysql:v1
+    - mysql:5.7
+    - phpmyadmin/phpmyadmin:latest
+  sync:
+    comparedTo:
+      destination:
+        namespace: liquitest
+        server: https://kubernetes.default.svc
+      source:
+        path: wtdemo-mainchart/dev
+        repoURL: https://github.com/gopaljayanthi/wisetech-k8s-repo.git
+        targetRevision: HEAD
+    revision: aa3c340c58eeb455c008d547f1de429fdd20d6d2
+    status: Synced
