@@ -36,5 +36,5 @@ spec:
           name: liquibase-config
       - name: changelog-volume
         configMap:
-          name: liquibase-rollback-changelog-config-new
+          name: liquibase-rollback-changelog-config
   backoffLimit: 4
