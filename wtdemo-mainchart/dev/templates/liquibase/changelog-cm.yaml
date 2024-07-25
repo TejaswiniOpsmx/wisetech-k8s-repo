@@ -5,7 +5,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "-2"        
   name: liquibase-changelog-config
 data:
-  changelog_4_create_example_table.xml: |
+  changelog_3_create_example_table.xml: |
     <?xml version="1.0" encoding="UTF-8"?>
     <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
