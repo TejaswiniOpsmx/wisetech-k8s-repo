@@ -5,10 +5,9 @@ metadata:
     argocd.argoproj.io/sync-wave: "-2"
   name: phpmyadmin
 spec:
-  type: NodePort
+  type: ClusterIP
   ports:
   - port: 80
     targetPort: 80
-    nodePort: 32000
   selector:
     app: phpmyadmin
