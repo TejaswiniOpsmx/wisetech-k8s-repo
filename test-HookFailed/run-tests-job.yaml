@@ -5,7 +5,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "5"
     argocd.argoproj.io/sync-options: Validate=false
     argocd.argoproj.io/sync-options: Force=true,Replace=true
-    argocd.argoproj.io/hook-delete-policy: HookFailed
+    #argocd.argoproj.io/hook-delete-policy: HookFailed
     foo: bar
   name: run-tests
 spec:

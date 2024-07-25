@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: test-hookfailed
+  namespace: argocd
+spec:
+  destination:
+    namespace: test-hookfailed
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: test-HookFailed
+    repoURL: https://github.com/gopaljayanthi/wisetech-k8s-repo.git
+    targetRevision: HEAD
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+
