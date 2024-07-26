@@ -24,7 +24,7 @@ data:
             http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
         
         <changeSet id="1" author="yourname">
-            <createTable tableName="example3">
+            <createTable tableName="example2">
                 <column name="id" type="INT">
                     <constraints primaryKey="true" nullable="false"/>
                 </column>
