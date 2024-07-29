@@ -12,7 +12,7 @@ metadata:
   name: phpmyadmin-ingress
 spec:
   rules:
-  - host: phpmyadmin.jpmc.opsmx.net
+  - host: phpmyadmin.devops.opsmx.org
     http:
       paths:
       - backend:
@@ -24,5 +24,5 @@ spec:
         pathType: ImplementationSpecific
   tls:
   - hosts:
-    - phpmyadmin.jpmc.opsmx.net
+    - phpmyadmin.devops.opsmx.org
     secretName: phpmyadmin-ingress

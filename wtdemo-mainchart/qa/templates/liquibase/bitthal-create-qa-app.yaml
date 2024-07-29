@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: liquibase-giri
+  name: liquibase-qa-bitthal
   namespace: argocd
 spec:
   destination:
