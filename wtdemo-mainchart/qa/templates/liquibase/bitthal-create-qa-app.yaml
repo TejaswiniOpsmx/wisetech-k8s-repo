@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: liquibase-giri
+  namespace: argocd
+spec:
+  destination:
+    namespace: liquibase
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: wtdemo-mainchart/qa
+    repoURL: https://github.com/gopaljayanthi/wisetech-k8s-repo.git
+    targetRevision: HEAD
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+
