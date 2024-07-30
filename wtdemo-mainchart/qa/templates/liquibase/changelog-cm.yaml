@@ -13,9 +13,9 @@ data:
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
             http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
         
-        <include file="changelog/changelog_6_create_example_table.xml"/>
+        <include file="changelog/changelog_5_create_example_table.xml"/>
     </databaseChangeLog>
-  changelog_6_create_example_table.xml: |
+  changelog_5_create_example_table.xml: |
     <?xml version="1.0" encoding="UTF-8"?>
     <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
@@ -24,7 +24,7 @@ data:
             http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
         
         <changeSet id="1" author="yourname">
-            <createTable tableName="example6">
+            <createTable tableName="example5">
                 <column name="id" type="INT">
                     <constraints primaryKey="true" nullable="false"/>
                 </column>
