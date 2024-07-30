@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    acme.cert-manager.io/http01-edit-in-place: "true"
+    cert-manager.io/issue-temporary-certificate: "true"
+    cert-manager.io/issuer: letsencrypt-isdargo-oes
+    kubernetes.io/ingress.class: nginx
+    kubernetes.io/tls-acme: "true"
+    meta.helm.sh/release-name: isdargo
+    meta.helm.sh/release-namespace: isdargo
+  labels:
+    app.kubernetes.io/managed-by: Helm
+  name: phpmyadmin-ingress
+spec:
+  rules:
+  - host: phpmyadmin.devops.opsmx.org 
+    http:
+      paths:
+      - backend:
+          service:
+            name: phpmyadmin
+            port:
+              number: 80
+        path: /
+        pathType: ImplementationSpecific
+  tls:
+  - hosts:
+    - phpmyadmin.devops.opsmx.org
+    secretName: phpmyadmin-ingress
