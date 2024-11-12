@@ -1,0 +1,90 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: multi-matrix-multicm-myplugin
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+  - matrix:
+      generators:
+      - matrix:
+          generators:
+          - git:
+              repoURL: https://github.com/gopaljayanthi/forjpmc.git
+              revision: HEAD
+              files:
+                - path: "base/*/config.json"
+              requeueAfterSeconds: 360
+          - git:
+              repoURL: https://github.com/gopaljayanthi/forjpmc.git
+              revision: HEAD
+              files:
+                - path: "test-git-files-generator/*/config.json"
+              requeueAfterSeconds: 360
+      - plugin:
+              configMapRef:
+                name: applicationset-hello-plugin
+              input:
+                parameters:
+                  repo: "gopaljayanthi/forjpmc"
+                  branch: "master"
+                  folder: "pluginfiles"
+              #requeueAfterSeconds: 120
+  strategy:
+    type: RollingSync
+    rollingSync:
+      steps:
+        - matchExpressions:
+          - key: syncWave
+            operator: In
+            values:
+              - zero
+          maxUpdate: 100%
+        - matchExpressions:
+          - key: syncWave
+            operator: In
+            values:
+              - one
+          maxUpdate: 100%
+  template:
+    metadata:
+      name: '{{.name}}-{{ .label }}'
+      annotations:
+        myananotation: '{{ .label }}'
+      labels:
+        syncWave: '{{ .syncWave }}'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/gopaljayanthi/forjpmc.git
+        path: multicm-plugin-helm
+        targetRevision: master
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{.name}}-{{ .label }}'
+      syncPolicy:
+        automated:
+          prune: true
+          allowEmpty: true
+        syncOptions:
+          - CreateNamespace=true
+        retry:
+          limit: 2
+          backoff:
+            duration: 1m
+            factor: 2
+            maxDuration: 7m
+  templatePatch: |
+    spec:
+      source:
+        helm:
+          parameters:
+          {{- if .contents }}
+          {{- range $fileName, $fileContents := .contents }}
+            - name: 'configMapFiles.{{ $fileName | replace "." "\\." }}'
+              value: '{{ $fileContents }}'
+          {{- end }}
+            - name: "name"
+              value: '{{.name}}'
+          {{- end }}

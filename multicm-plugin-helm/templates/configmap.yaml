@@ -1,0 +1,13 @@
+{{- if .Values.configMapFiles }}
+{{- range $fileName, $fileContents := .Values.configMapFiles }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $fileName | replace "." "-" }}
+data:
+  "{{ $fileName }}": |-
+    {{ $fileContents | b64dec | nindent 4 }}
+{{- end }}
+{{- end }}
+

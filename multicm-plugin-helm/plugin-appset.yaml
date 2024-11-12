@@ -1,0 +1,42 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: plugin-appset2
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+          - plugin:
+              configMapRef:
+                name: applicationset-hello-plugin
+              input:
+                parameters:
+                  repo: "gopaljayanthi/forjpmc"
+                  branch: "master"
+                  folder: "pluginfolder"
+              requeueAfterSeconds: 240
+  template:
+    metadata:
+      name: "plugin-appset2"
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/gopaljayanthi/forjpmc.git
+        path: multicm-plugin-helm
+        targetRevision: master
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: plugin-appset2
+  templatePatch: |
+    spec:
+      source:
+        helm:
+          parameters:
+          {{- if .contents }}
+          {{- range $fileName, $fileContents := .contents }}
+            - name: 'configMapFiles.{{ $fileName | replace "." "\\." }}'
+              value: '{{ $fileContents }}'
+          {{- end }}
+            - name: "name"
+              value: '{{.name}}'
+          {{- end }}

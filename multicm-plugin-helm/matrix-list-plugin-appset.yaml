@@ -1,0 +1,68 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: matrix-list-plugin
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+  - matrix:
+      generators:
+      - list:
+          elements:
+          - name: element1
+            label: label1
+          - name: element2
+            label: label2
+          - name: element3
+            label: label3
+          - name: element4
+            label: label4
+      - plugin:
+              configMapRef:
+                name: applicationset-hello-plugin
+              input:
+                parameters:
+                  repo: "gopaljayanthi/wisetech-k8s-repo"
+                  branch: "master"
+                  folder: "pluginfiles"
+              requeueAfterSeconds: 180
+  template:
+    metadata:
+      name: '{{.name}}-{{ .label }}'
+      annotations:
+        myananotation: '{{ .label }}'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/gopaljayanthi/wisetech-k8s-repo.git
+        path: multicm-plugin-helm
+        targetRevision: master
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{.name}}-{{ .label }}'
+      syncPolicy:
+        automated:
+          prune: true
+          allowEmpty: true
+        syncOptions:
+          - CreateNamespace=true
+        retry:
+          limit: 2
+          backoff:
+            duration: 1m
+            factor: 2
+            maxDuration: 7m
+  templatePatch: |
+    spec:
+      source:
+        helm:
+          parameters:
+          {{- if .contents }}
+          {{- range $fileName, $fileContents := .contents }}
+            - name: 'configMapFiles.{{ $fileName | replace "." "\\." }}'
+              value: '{{ $fileContents }}'
+          {{- end }}
+            - name: "name"
+              value: '{{.name}}'
+          {{- end }}

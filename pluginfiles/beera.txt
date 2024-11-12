@@ -1,0 +1,3 @@
+kaya=beera
+another=sora
+yetanother=tenka
