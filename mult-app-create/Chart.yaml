@@ -1,0 +1,4 @@
+apiVersion: v2
+name: mult-app-create
+description: A simple Helm chart for multi-app creation
+version: 0.1.0
