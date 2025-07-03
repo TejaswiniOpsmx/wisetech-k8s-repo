@@ -1,4 +1,4 @@
 apps:
-  - name: "test1"
-  - name: "test2"
-  - name: "test3"
+  - name: "qa1"
+  - name: "qa2"
+  - name: "qa3"
