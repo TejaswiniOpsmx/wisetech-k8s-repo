@@ -9,7 +9,7 @@ data:
   seventh: seven
   eigth: eight
   ninth: nine
-  tenth: ten
+  tenth: 100000000000000000
 kind: ConfigMap
 metadata:
   name: forg2
