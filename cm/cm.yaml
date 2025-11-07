@@ -14,4 +14,4 @@ kind: ConfigMap
 metadata:
   name: forg2
   annotations:
-    notifications.argoproj.io/subscribe.on-deployed.dora-metrics: ""
+    notifications.argoproj.io/subscribe.on-deploy-succeeded.dora-metrics":""
